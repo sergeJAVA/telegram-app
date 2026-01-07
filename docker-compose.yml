@@ -1,0 +1,17 @@
+services:
+
+  postgresql:
+    image: postgres:17.4
+    container_name: appDB
+    environment:
+      POSTGRES_DB: appDB
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: var/lib/postgresql/data
+    volumes:
+      - postgresql:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgresql:
