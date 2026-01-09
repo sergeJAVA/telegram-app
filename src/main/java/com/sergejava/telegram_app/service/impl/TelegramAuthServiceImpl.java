@@ -2,6 +2,7 @@ package com.sergejava.telegram_app.service.impl;
 
 import com.sergejava.telegram_app.service.TelegramAuthService;
 import com.sergejava.telegram_app.util.ParseInitData;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class TelegramAuthServiceImpl  implements TelegramAuthService {
 
     @Value("${telegram.bot.token}")
@@ -38,9 +40,12 @@ public class TelegramAuthServiceImpl  implements TelegramAuthService {
 
             return calculatedHashHex.equals(receivedHash);
         }catch (Exception ex) {
+            log.info("Exception message: {}", ex.getMessage());
             return false;
         }
     }
+
+    //TODO: Добавить метод для регистрации пользователя и использовать его вместо метода UserService в контроллере
 
     private Mac createMacWithKey(String secretKey) throws Exception{
         Mac mac = Mac.getInstance("HmacSHA256");
