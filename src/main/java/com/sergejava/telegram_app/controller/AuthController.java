@@ -46,14 +46,10 @@ public class AuthController {
         if (!telegramAuthService.validateInitData(initData)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid initData");
         }
-        try {
-            Map<String, String> params = parseInitData(initData);
-            InitDataUser initDataUser = objectMapper.readValue(params.get("user"), InitDataUser.class);
-            userService.saveUser(UserMapper.toDto(initDataUser));
-            return ResponseEntity.ok(Map.of("message", "User data saved successfully"));
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
+        Map<String, String> params = parseInitData(initData);
+        InitDataUser initDataUser = objectMapper.readValue(params.get("user"), InitDataUser.class);
+        userService.saveUser(UserMapper.toDto(initDataUser));
+        return ResponseEntity.ok(Map.of("message", "User data saved successfully"));
     }
 
 }
