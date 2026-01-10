@@ -1,10 +1,8 @@
 package com.sergejava.telegram_app.controller;
 
 import com.sergejava.telegram_app.dto.InitDataUser;
-import com.sergejava.telegram_app.mapper.UserMapper;
 import com.sergejava.telegram_app.security.service.JwtService;
 import com.sergejava.telegram_app.service.TelegramAuthService;
-import com.sergejava.telegram_app.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +22,6 @@ import static com.sergejava.telegram_app.util.ParseInitData.parseInitData;
 public class AuthController {
 
     private final TelegramAuthService telegramAuthService;
-    private final UserService userService;
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
 
@@ -47,8 +44,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid initData");
         }
         Map<String, String> params = parseInitData(initData);
-        InitDataUser initDataUser = objectMapper.readValue(params.get("user"), InitDataUser.class);
-        userService.saveUser(UserMapper.toDto(initDataUser));
+        telegramAuthService.signUp(params);
         return ResponseEntity.ok(Map.of("message", "User data saved successfully"));
     }
 

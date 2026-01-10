@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Set;
 
@@ -17,6 +18,7 @@ public class TokenData {
 
     private Long userId;
     private String username;
-    private Set<String> roles;
+    private Set<? extends GrantedAuthority> authorities;
+    private String token;
 
 }
