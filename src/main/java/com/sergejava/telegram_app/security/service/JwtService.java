@@ -1,6 +1,7 @@
 package com.sergejava.telegram_app.security.service;
 
 import com.sergejava.telegram_app.dto.InitDataUser;
+import com.sergejava.telegram_app.security.TokenData;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -8,6 +9,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -54,7 +57,7 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", initDataUser.getId());
         claims.put("username", initDataUser.getUsername());
-        claims.put("roles", Set.of("USER"));
+        claims.put("roles", Set.of("ROLE_USER"));
         return Jwts.builder()
                 .claims(claims)
                 .subject(initDataUser.getUsername())
@@ -62,6 +65,17 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + lifeTime))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .compact();
+    }
+
+    public TokenData parseToken(String token) {
+        return TokenData.builder()
+                .token(token)
+                .username(getUsernameFromToken(token))
+                .authorities(getRolesFromToken(token).stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toSet()))
+                .userId(getUserIdFromToken(token))
+                .build();
     }
 
     private Claims getAllClaimsFromToken(String token) {

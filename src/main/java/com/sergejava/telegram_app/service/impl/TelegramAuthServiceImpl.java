@@ -1,10 +1,16 @@
 package com.sergejava.telegram_app.service.impl;
 
+import com.sergejava.telegram_app.dto.InitDataUser;
+import com.sergejava.telegram_app.dto.UserDto;
+import com.sergejava.telegram_app.mapper.UserMapper;
 import com.sergejava.telegram_app.service.TelegramAuthService;
+import com.sergejava.telegram_app.service.UserService;
 import com.sergejava.telegram_app.util.ParseInitData;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -15,10 +21,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TelegramAuthServiceImpl  implements TelegramAuthService {
 
     @Value("${telegram.bot.token}")
     private String botToken;
+
+    private final UserService userService;
+    private final ObjectMapper objectMapper;
 
     @Override
     public boolean validateInitData(String initData) {
@@ -45,7 +55,11 @@ public class TelegramAuthServiceImpl  implements TelegramAuthService {
         }
     }
 
-    //TODO: Добавить метод для регистрации пользователя и использовать его вместо метода UserService в контроллере
+    @Override
+    public UserDto signUp(Map<String, String> params) {
+        InitDataUser initDataUser = objectMapper.readValue(params.get("user"), InitDataUser.class);
+        return userService.saveUser(UserMapper.toDto(initDataUser));
+    }
 
     private Mac createMacWithKey(String secretKey) throws Exception{
         Mac mac = Mac.getInstance("HmacSHA256");
