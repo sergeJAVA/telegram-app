@@ -65,7 +65,7 @@ async function sendUserData() {
 
 tg.MainButton.setText('Закрыть приложение');
 tg.MainButton.show();
-tg.MainButton.onClickc(() => {
+tg.MainButton.onClick(() => {
     tg.close();
 });
 
