@@ -5,5 +5,5 @@ import com.sergejava.telegram_app.dto.UserDto;
 public interface UserService {
 
     UserDto saveUser(UserDto userDto);
-
+    void deleteUserById(Long id);
 }
