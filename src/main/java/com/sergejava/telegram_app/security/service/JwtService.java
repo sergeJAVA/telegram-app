@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -38,8 +39,8 @@ public class JwtService {
         return getClaimFromToken(token, claims -> claims.get("username", String.class));
     }
 
-    public Set<String> getRolesFromToken(String token) {
-        return getClaimFromToken(token, claims -> claims.get("roles", Set.class));
+    public List<String> getRolesFromToken(String token) {
+        return getClaimFromToken(token, claims -> claims.get("roles", List.class));
     }
 
     public boolean isTokenExpired(String token) {
