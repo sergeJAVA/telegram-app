@@ -1,4 +1,5 @@
 let tg = window.Telegram.WebApp;
+let userToken = null;
 
 tg.ready();
 tg.expand();
@@ -21,19 +22,88 @@ if (userInfo) {
     userInfoDiv.innerHTML = '<p>Данные пользователя недоступны</p>';
 }
 
-// Обработка кнопки
-document.getElementById('btn').addEventListener('click', async () => {
-    await sendUserData(); // Вызываем функцию
+// Инициализация при загрузке приложения
+window.addEventListener('load', async () => {
+    await initializeApp();
 });
 
-async function sendUserData() {
+async function initializeApp() {
     const resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = '<p>Загрузка...</p>';
+    resultDiv.innerHTML = '<p>Инициализация приложения...</p>';
 
     try {
-        const response = await fetch('/api/user', {
+        // Шаг 1: Получение JWT токена
+        const tokenResponse = await fetch('/api/auth', {
             method: 'POST',
             headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                initData: tg.initData
+            })
+        });
+
+        if (!tokenResponse.ok) {
+            const errorData = await tokenResponse.text();
+            throw new Error(`Ошибка при получении токена: ${errorData}`);
+        }
+
+        const tokenData = await tokenResponse.json();
+        userToken = tokenData.token;
+        console.log('Token получен:', userToken);
+
+        // Шаг 2: Проверка наличия пользователя в БД
+        const validateResponse = await fetch('/api/users/validate-presence', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${userToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const isPresent = validateResponse.ok ? (await validateResponse.json()) : false;
+        console.log('Результат проверки:', isPresent);
+
+        // Шаг 3: Отображение результата
+        if (isPresent) {
+            // Пользователь найден в БД
+            resultDiv.innerHTML = `
+                <h3>✅ Добро пожаловать!</h3>
+                <p>Вы уже зарегистрированы в нашем приложении.</p>
+            `;
+            document.getElementById('btn').style.display = 'none';
+            tg.showAlert('Вы успешно авторизованы!');
+        } else {
+            // Пользователь не найден - показываем кнопку регистрации
+            resultDiv.innerHTML = `
+                <h3>👋 Добро пожаловать!</h3>
+                <p>Похоже, вы еще не зарегистрированы.</p>
+            `;
+            document.getElementById('btn').textContent = 'Зарегистрироваться';
+            document.getElementById('btn').addEventListener('click', registerUser);
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `<p style="color: red;">Ошибка при инициализации: ${error.message}</p>`;
+        tg.showAlert(`Ошибка: ${error.message}`);
+        console.error('Ошибка инициализации:', error);
+    }
+}
+
+async function registerUser() {
+    const resultDiv = document.getElementById('result');
+    const btn = document.getElementById('btn');
+    btn.disabled = true;
+    resultDiv.innerHTML = '<p>Регистрация...</p>';
+
+    try {
+        if (!userToken) {
+            throw new Error('Токен не найден. Попробуйте перезагрузить приложение.');
+        }
+
+        const response = await fetch('/api/auth/signUp', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${userToken}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -47,19 +117,21 @@ async function sendUserData() {
         }
 
         const result = await response.json();
-        
+
         resultDiv.innerHTML = `
-            <h3>Ответ от сервера:</h3>
+            <h3>✅ Успешная регистрация!</h3>
             <p>${result.message}</p>
             <p><strong>Статус:</strong> ${result.status}</p>
         `;
 
-        tg.showAlert('Данные успешно отправлены!');
-        console.log('User data saved:', result);
+        tg.showAlert('Вы успешно зарегистрированы!');
+        btn.style.display = 'none';
+        console.log('Пользователь зарегистрирован:', result);
     } catch (error) {
-        resultDiv.innerHTML = `<p style="color: red;">Ошибка: ${error.message}</p>`;
+        resultDiv.innerHTML = `<p style="color: red;">Ошибка при регистрации: ${error.message}</p>`;
         tg.showAlert(`Ошибка: ${error.message}`);
-        console.error('Error saving user data:', error);
+        console.error('Ошибка регистрации:', error);
+        btn.disabled = false;
     }
 }
 

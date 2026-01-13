@@ -5,11 +5,14 @@ import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
 import com.sergejava.telegram_app.mapper.UserMapper;
 import com.sergejava.telegram_app.model.User;
 import com.sergejava.telegram_app.repository.UserRepository;
+import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.UserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,12 @@ public class UserServiceImpl implements UserService {
         });
         User user = UserMapper.toEntity(userDto);
         return UserMapper.toDto(userRepository.save(user));
+    }
+
+    @Override
+    public boolean validatePresence(TokenData tokenData) {
+        Optional<User> user = userRepository.findByUserId(tokenData.getUserId());
+        return user.isPresent();
     }
 
 }
