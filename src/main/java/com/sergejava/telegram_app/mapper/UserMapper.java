@@ -2,7 +2,7 @@ package com.sergejava.telegram_app.mapper;
 
 import com.sergejava.telegram_app.dto.InitDataUser;
 import com.sergejava.telegram_app.dto.UserDto;
-import com.sergejava.telegram_app.model.User;
+import com.sergejava.telegram_app.entity.User;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
