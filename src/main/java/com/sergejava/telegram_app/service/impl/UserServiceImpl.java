@@ -3,7 +3,7 @@ package com.sergejava.telegram_app.service.impl;
 import com.sergejava.telegram_app.dto.UserDto;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
 import com.sergejava.telegram_app.mapper.UserMapper;
-import com.sergejava.telegram_app.model.User;
+import com.sergejava.telegram_app.entity.User;
 import com.sergejava.telegram_app.repository.UserRepository;
 import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.UserService;

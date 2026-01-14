@@ -1,4 +1,4 @@
-package com.sergejava.telegram_app.model;
+package com.sergejava.telegram_app.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
