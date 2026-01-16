@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS products(
     price NUMERIC(10,2) NOT NULL DEFAULT 0,
     image_url TEXT NOT NULL,
     stock INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     category_id BIGINT,
 
     CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,

@@ -3,6 +3,7 @@ package com.sergejava.telegram_app.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -27,6 +29,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -48,7 +51,8 @@ public class User {
     @Column(name = "allows_write_to_pm")
     private Boolean allowsWriteToPM;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS users(
     username VARCHAR(50) NOT NULL,
     language_code VARCHAR(4) NOT NULL,
     allows_write_to_pm BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );

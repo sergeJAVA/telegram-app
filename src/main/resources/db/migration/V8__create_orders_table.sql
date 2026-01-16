@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS orders(
     status VARCHAR(15) NOT NULL,
     delivery_address VARCHAR(255) NOT NULL,
     phone_number VARCHAR(12),
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE,
     user_id BIGINT NOT NULL,
 
