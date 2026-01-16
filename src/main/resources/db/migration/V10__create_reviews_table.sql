@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS reviews(
+    id BIGSERIAL PRIMARY KEY,
+    rating INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+
+    CONSTRAINT reviews_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT reviews_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);

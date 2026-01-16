@@ -1,5 +1,6 @@
 package com.sergejava.telegram_app.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,11 +43,12 @@ public class Cart {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @OneToOne()
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "cart", orphanRemoval = true)
+    @Builder.Default
     private Set<CartItem> cartItems = new HashSet<>();
 
 }

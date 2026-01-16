@@ -14,7 +14,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,6 +48,9 @@ public class User {
     @Column(name = "allows_write_to_pm")
     private Boolean allowsWriteToPM;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Cart cart;
 
@@ -54,6 +59,7 @@ public class User {
             orphanRemoval = true,
             cascade = CascadeType.ALL
     )
+    @Builder.Default
     private Set<Order> orders = new HashSet<>();
 
     @OneToMany(
@@ -61,6 +67,7 @@ public class User {
             orphanRemoval = true,
             cascade = CascadeType.ALL
     )
+    @Builder.Default
     private Set<Review> reviews = new HashSet<>();
 
 }

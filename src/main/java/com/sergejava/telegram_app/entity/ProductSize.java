@@ -28,12 +28,12 @@ public class ProductSize {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "stock")
+    private Integer stock;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
-    @Column(name = "stock")
-    private Integer stock;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "size_id")

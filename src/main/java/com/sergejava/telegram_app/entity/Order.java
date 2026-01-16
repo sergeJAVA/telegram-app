@@ -70,6 +70,7 @@ public class Order {
             orphanRemoval = true,
             mappedBy = "order"
     )
+    @Builder.Default
     private Set<OrderItem> orderItems = new HashSet<>();
 
 }
