@@ -7,12 +7,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDto {
+public class UserDTO {
+
+    private Long id;
 
     @JsonProperty("user_id")
     private Long userId;
@@ -28,5 +32,8 @@ public class UserDto {
 
     @JsonProperty("allows_write_to_pm")
     private Boolean allowsWriteToPM;
+
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
 
 }
