@@ -1,7 +1,7 @@
 package com.sergejava.telegram_app.service.impl;
 
 import com.sergejava.telegram_app.dto.InitDataUser;
-import com.sergejava.telegram_app.dto.UserDto;
+import com.sergejava.telegram_app.dto.UserDTO;
 import com.sergejava.telegram_app.mapper.UserMapper;
 import com.sergejava.telegram_app.service.TelegramAuthService;
 import com.sergejava.telegram_app.service.UserService;
@@ -56,7 +56,7 @@ public class TelegramAuthServiceImpl  implements TelegramAuthService {
     }
 
     @Override
-    public UserDto signUp(Map<String, String> params) {
+    public UserDTO signUp(Map<String, String> params) {
         InitDataUser initDataUser = objectMapper.readValue(params.get("user"), InitDataUser.class);
         return userService.saveUser(UserMapper.toDto(initDataUser));
     }

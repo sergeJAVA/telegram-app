@@ -1,6 +1,6 @@
 package com.sergejava.telegram_app.service.impl;
 
-import com.sergejava.telegram_app.dto.UserDto;
+import com.sergejava.telegram_app.dto.UserDTO;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
 import com.sergejava.telegram_app.mapper.UserMapper;
 import com.sergejava.telegram_app.entity.User;
@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto saveUser(@NonNull UserDto userDto) {
+    public UserDTO saveUser(@NonNull UserDTO userDto) {
         userRepository.findByUserId(userDto.getUserId()).ifPresent(user -> {
             throw new UserAlreadyExistsException("User with user_id " + user.getUserId() + " already exists.");
         });
