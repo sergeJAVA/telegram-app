@@ -64,6 +64,12 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.toDTO(savedProduct);
     }
 
+    /**
+     * Метод для подсчёта количества товаров на складе.
+     * @param sizes {@code Map<String, Integer>} тип размера и их количество в формате ключ-значение
+     * @return {@code Integer} общее количество всех товаров.
+     * @author sergeJAVA
+     */
     private Integer getTotalStock(Map<String, Integer> sizes) {
         int totalStock = 0;
         for (Map.Entry<String, Integer> entry : sizes.entrySet()) {
@@ -72,6 +78,13 @@ public class ProductServiceImpl implements ProductService {
         return totalStock;
     }
 
+    /**
+     * Метод для создания и возвращения размеров товара.
+     * @param sizes Тип размера и их количество в формате ключ-значение.
+     * @param product Сущность для связывания с сущностью размера товара {@link ProductSize}.
+     * @return возвращает {@code List<ProductSize}.
+     * @author sergeJAVA
+     */
     private List<ProductSize> getProductSizes(Map<String, Integer> sizes, Product product) {
         Set<ProductSize> productSizes = new HashSet<>();
         for (Map.Entry<String, Integer> entry : sizes.entrySet()) {
@@ -92,6 +105,13 @@ public class ProductServiceImpl implements ProductService {
         return productSizeRepository.saveAll(productSizes);
     }
 
+    /**
+     * Метод для создания и получения картинок товара.
+     * <p>Примечание: первая картинка из списка будет иметь значение {@code true} у поля {@code isMain}.</p>
+     * @param imageUrls Ссылки на картинку.
+     * @param product Сущность для связывания с сущностью картинки товара {@link ProductImage}.
+     * @author sergeJAVA
+     */
     private List<ProductImage> getProductImages(List<String> imageUrls, Product product) {
         if (imageUrls == null || imageUrls.isEmpty()) {
             throw new ImageUrlsNullOrEmptyException();
@@ -115,6 +135,11 @@ public class ProductServiceImpl implements ProductService {
         return productImageRepository.saveAll(images);
     }
 
+    /**
+     * Метод для проверки того, что ссылки на картинки непустые.
+     * @param imageUrls ссылки на картинки.
+     * @author sergeJAVA
+     */
     private void validateImageUrls(List<String> imageUrls) {
         for (String url : imageUrls) {
             if (!StringUtils.hasText(url)) {
