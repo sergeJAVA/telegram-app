@@ -66,12 +66,4 @@ public class User {
     @Builder.Default
     private Set<Order> orders = new HashSet<>();
 
-    @OneToMany(
-            mappedBy = "user",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
-    )
-    @Builder.Default
-    private Set<Review> reviews = new HashSet<>();
-
 }
