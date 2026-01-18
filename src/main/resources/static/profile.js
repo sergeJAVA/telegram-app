@@ -65,26 +65,30 @@ async function initializeApp() {
         console.log('Результат проверки:', isPresent);
 
         // Шаг 3: Отображение результата
+        const btnElement = document.getElementById('btn');
+        const backBtnElement = document.getElementById('backBtn');
+
         if (isPresent) {
             // Пользователь найден в БД
             resultDiv.innerHTML = `
                 <h3>✅ Добро пожаловать!</h3>
                 <p>Вы уже зарегистрированы в нашем приложении.</p>
             `;
-            document.getElementById('btn').style.display = 'none';
-            tg.showAlert('Вы успешно авторизованы!');
+            btnElement.style.display = 'none';
+            backBtnElement.style.display = 'block';
         } else {
             // Пользователь не найден - показываем кнопку регистрации
             resultDiv.innerHTML = `
                 <h3>👋 Добро пожаловать!</h3>
                 <p>Похоже, вы еще не зарегистрированы.</p>
             `;
-            document.getElementById('btn').textContent = 'Зарегистрироваться';
-            document.getElementById('btn').addEventListener('click', registerUser);
+            btnElement.style.display = 'block';
+            btnElement.textContent = 'Зарегистрироваться';
+            btnElement.addEventListener('click', registerUser);
+            backBtnElement.style.display = 'block';
         }
     } catch (error) {
         resultDiv.innerHTML = `<p style="color: red;">Ошибка при инициализации: ${error.message}</p>`;
-        tg.showAlert(`Ошибка: ${error.message}`);
         console.error('Ошибка инициализации:', error);
     }
 }
@@ -124,16 +128,19 @@ async function registerUser() {
             <p><strong>Статус:</strong> ${result.status}</p>
         `;
 
-        tg.showAlert('Вы успешно зарегистрированы!');
         btn.style.display = 'none';
         console.log('Пользователь зарегистрирован:', result);
     } catch (error) {
         resultDiv.innerHTML = `<p style="color: red;">Ошибка при регистрации: ${error.message}</p>`;
-        tg.showAlert(`Ошибка: ${error.message}`);
         console.error('Ошибка регистрации:', error);
         btn.disabled = false;
     }
 }
+
+// Кнопка возврата в магазин
+document.getElementById('backBtn').addEventListener('click', () => {
+    window.location.href = '/index.html';
+});
 
 tg.MainButton.setText('Закрыть приложение');
 tg.MainButton.show();
