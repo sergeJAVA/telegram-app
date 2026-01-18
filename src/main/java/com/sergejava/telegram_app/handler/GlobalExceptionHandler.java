@@ -1,6 +1,8 @@
 package com.sergejava.telegram_app.handler;
 
 import com.sergejava.telegram_app.exceptions.CategoryAlreadyExistsException;
+import com.sergejava.telegram_app.exceptions.ImageUrlsNullOrEmptyException;
+import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SizeNotFoundByNameException.class)
     public ResponseEntity<?> handleSizeNotFoundByName(SizeNotFoundByNameException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ImageUrlsNullOrEmptyException.class)
+    public ResponseEntity<?> handleImageUrlsNullOrEmpty(ImageUrlsNullOrEmptyException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidImageUrlException.class)
+    public ResponseEntity<?> handleImageUrlsNullOrEmpty(InvalidImageUrlException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
 }

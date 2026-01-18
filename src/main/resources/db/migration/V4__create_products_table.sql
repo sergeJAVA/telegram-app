@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS products(
     name VARCHAR(255) NOT NULL,
     description TEXT,
     price NUMERIC(10,2) NOT NULL DEFAULT 0,
-    image_url TEXT NOT NULL,
     stock INTEGER DEFAULT 0,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     category_id BIGINT,
