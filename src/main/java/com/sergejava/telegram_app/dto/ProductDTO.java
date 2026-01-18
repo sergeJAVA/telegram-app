@@ -23,8 +23,8 @@ public class ProductDTO {
 
     private BigDecimal price;
 
-    @JsonProperty("image_url")
-    private String imageUrl;
+    @JsonProperty("image_urls")
+    private Set<ProductImageDTO> imageUrls;
 
     private Integer stock;
 

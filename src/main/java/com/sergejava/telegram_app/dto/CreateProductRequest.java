@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -33,5 +35,9 @@ public class CreateProductRequest {
 
     @Builder.Default
     private Map<String, Integer> sizes = new HashMap<>();
+
+    @JsonProperty("image_urls")
+    @Builder.Default
+    private List<String> imageUrls = new ArrayList<>();
 
 }
