@@ -3,12 +3,19 @@ package com.sergejava.telegram_app.handler;
 import com.sergejava.telegram_app.exceptions.CategoryAlreadyExistsException;
 import com.sergejava.telegram_app.exceptions.ImageUrlsNullOrEmptyException;
 import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
+import com.sergejava.telegram_app.exceptions.InvalidPageOrSizeException;
+import com.sergejava.telegram_app.exceptions.InvalidValidationTypeException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -35,6 +42,29 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidImageUrlException.class)
     public ResponseEntity<?> handleImageUrlsNullOrEmpty(InvalidImageUrlException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> validationArgument(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidPageOrSizeException.class)
+    public ResponseEntity<?> handleInvalidPageOrSize(InvalidPageOrSizeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidValidationTypeException.class)
+    public ResponseEntity<?> handleInvalidValidationType(InvalidValidationTypeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 

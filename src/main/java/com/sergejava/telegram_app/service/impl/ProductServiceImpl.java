@@ -18,7 +18,11 @@ import com.sergejava.telegram_app.repository.ProductRepository;
 import com.sergejava.telegram_app.repository.ProductSizeRepository;
 import com.sergejava.telegram_app.repository.SizeRepository;
 import com.sergejava.telegram_app.service.ProductService;
+import com.sergejava.telegram_app.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -62,6 +66,12 @@ public class ProductServiceImpl implements ProductService {
         savedProduct.setImages(productImages);
 
         return ProductMapper.toDTO(savedProduct);
+    }
+
+    @Override
+    public Page<ProductDTO> findByCategoryName(String categoryName, Pageable pageable) {
+        Specification<Product> spec = ProductSpecification.byCategoryName(categoryName);
+        return productRepository.findAll(spec, pageable).map(ProductMapper::toDTO);
     }
 
     /**

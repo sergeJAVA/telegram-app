@@ -2,6 +2,8 @@ package com.sergejava.telegram_app.service;
 
 import com.sergejava.telegram_app.dto.CreateProductRequest;
 import com.sergejava.telegram_app.dto.ProductDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
 
@@ -12,5 +14,7 @@ public interface ProductService {
      * @author sergeJAVA
      */
     ProductDTO createProduct(CreateProductRequest request);
+
+    Page<ProductDTO> findByCategoryName(String categoryName, Pageable pageable);
 
 }
