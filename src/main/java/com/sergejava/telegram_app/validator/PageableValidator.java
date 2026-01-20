@@ -35,7 +35,7 @@ public class PageableValidator implements ConstraintValidator<ValidPageable, Int
     }
 
     /**
-     * Метод для валидация значения page.
+     * Метод для валидации значения page.
      * @param value значение переменной типа page.
      * @return {@code boolean}
      * @author sergeJAVA
@@ -48,7 +48,7 @@ public class PageableValidator implements ConstraintValidator<ValidPageable, Int
     }
 
     /**
-     * Метод для валидация значения size.
+     * Метод для валидации значения size.
      * @param value значение переменной типа size.
      * @return {@code boolean}
      * @author sergeJAVA
