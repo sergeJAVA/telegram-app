@@ -36,4 +36,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.findByCategoryName(categoryName, PageRequest.of(page, size)));
     }
 
+    @GetMapping
+    public ResponseEntity<Page<ProductDTO>> getAll(
+            @ValidPageable @RequestParam(defaultValue = "0") int page,
+            @ValidPageable(type = "size") @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(productService.findAll(PageRequest.of(page, size)));
+    }
+
 }

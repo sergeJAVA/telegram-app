@@ -74,6 +74,12 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAll(spec, pageable).map(ProductMapper::toDTO);
     }
 
+    @Override
+    public Page<ProductDTO> findAll(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(ProductMapper::toDTO);
+    }
+
     /**
      * Метод для подсчёта количества товаров на складе.
      * @param sizes {@code Map<String, Integer>} тип размера и их количество в формате ключ-значение

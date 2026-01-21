@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -27,6 +29,14 @@ public class CategoryServiceImpl implements CategoryService {
                 .description(categoryDTO.getDescription())
                 .build();
         return CategoryMapper.toDTO(categoryRepository.save(category));
+    }
+
+    @Override
+    public List<CategoryDTO> findAll() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(CategoryMapper::toDTO)
+                .toList();
     }
 
 }
