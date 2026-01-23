@@ -2,6 +2,7 @@ package com.sergejava.telegram_app.service.impl;
 
 import com.sergejava.telegram_app.dto.CreateProductRequest;
 import com.sergejava.telegram_app.dto.ProductDTO;
+import com.sergejava.telegram_app.dto.ProductSizeDTO;
 import com.sergejava.telegram_app.entity.Category;
 import com.sergejava.telegram_app.entity.Product;
 import com.sergejava.telegram_app.entity.ProductImage;
@@ -9,6 +10,7 @@ import com.sergejava.telegram_app.entity.ProductSize;
 import com.sergejava.telegram_app.entity.Size;
 import com.sergejava.telegram_app.exceptions.CategoryNotFoundException;
 import com.sergejava.telegram_app.exceptions.ImageUrlsNullOrEmptyException;
+import com.sergejava.telegram_app.exceptions.InsufficientStockException;
 import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.mapper.ProductMapper;
@@ -78,6 +80,29 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable)
                 .map(ProductMapper::toDTO);
+    }
+
+    @Transactional
+    @Override
+    public void changeProductSizeStock(Product product, String sizeName, Integer quantity) {
+        int totalStock = product.getStock();
+        if (totalStock == 0 || totalStock < quantity) {
+            throw new InsufficientStockException("the total stock of the product is either zero " +
+                    "or the quantity of the requested product is greater than the stock.");
+        }
+        ProductSize productSize = product.getProductSizes()
+                .stream()
+                .filter(p -> p.getSize().getName().equals(sizeName))
+                .findFirst().orElseThrow(() -> new RuntimeException("ProductSize with size '" + sizeName + "' not found!"));
+        int stockSize = productSize.getStock();
+        if (stockSize == 0 || stockSize < quantity) {
+            throw new InsufficientStockException("The stock of the required product size is 0" +
+                    " or the requested quantity is greater than the stock size!");
+        }
+        stockSize -= quantity;
+        totalStock -= quantity;
+        productSize.setStock(stockSize);
+        product.setStock(totalStock);
     }
 
     /**

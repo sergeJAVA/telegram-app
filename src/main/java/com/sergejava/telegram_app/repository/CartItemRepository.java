@@ -1,4 +1,7 @@
 package com.sergejava.telegram_app.repository;
 
-public interface CartItemRepository {
+import com.sergejava.telegram_app.entity.CartItem;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 }

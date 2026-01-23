@@ -124,7 +124,7 @@ public class JwtService {
                 .authorities(getRolesFromToken(token).stream()
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toSet()))
-                .userId(getUserIdFromToken(token))
+                .userTelegramId(getUserIdFromToken(token))
                 .build();
     }
 

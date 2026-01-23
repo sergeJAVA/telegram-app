@@ -2,7 +2,9 @@ package com.sergejava.telegram_app.service;
 
 import com.sergejava.telegram_app.dto.CreateProductRequest;
 import com.sergejava.telegram_app.dto.ProductDTO;
+import com.sergejava.telegram_app.dto.ProductSizeDTO;
 import com.sergejava.telegram_app.entity.Product;
+import com.sergejava.telegram_app.entity.ProductSize;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,5 +39,7 @@ public interface ProductService {
      * @author sergeJAVA
      */
     Page<ProductDTO> findAll(Pageable pageable);
+
+    void changeProductSizeStock(Product product, String sizeName, Integer quantity);
 
 }

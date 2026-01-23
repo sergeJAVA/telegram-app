@@ -1,12 +1,15 @@
 package com.sergejava.telegram_app.handler;
 
 import com.sergejava.telegram_app.exceptions.CategoryAlreadyExistsException;
+import com.sergejava.telegram_app.exceptions.CategoryNotFoundException;
 import com.sergejava.telegram_app.exceptions.ImageUrlsNullOrEmptyException;
+import com.sergejava.telegram_app.exceptions.InsufficientStockException;
 import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
 import com.sergejava.telegram_app.exceptions.InvalidPageOrSizeException;
 import com.sergejava.telegram_app.exceptions.InvalidValidationTypeException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
+import com.sergejava.telegram_app.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -68,6 +71,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidValidationTypeException.class)
     public ResponseEntity<?> handleInvalidValidationType(InvalidValidationTypeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<?> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<?> handleCategoryNotFound(CategoryNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<?> handleInsufficientStock(InsufficientStockException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 

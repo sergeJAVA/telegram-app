@@ -1,0 +1,1 @@
+ALTER TABLE cart_items ADD COLUMN product_size VARCHAR(10);

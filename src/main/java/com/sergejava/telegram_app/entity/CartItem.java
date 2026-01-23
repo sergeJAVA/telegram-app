@@ -44,4 +44,7 @@ public class CartItem {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @Column(name = "product_size")
+    private String productSize;
+
 }

@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean validatePresence(TokenData tokenData) {
-        Optional<User> user = userRepository.findByUserId(tokenData.getUserId());
+        Optional<User> user = userRepository.findByUserId(tokenData.getUserTelegramId());
         return user.isPresent();
     }
 
