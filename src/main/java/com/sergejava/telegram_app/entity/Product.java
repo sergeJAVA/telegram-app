@@ -24,7 +24,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 @Entity
 @Table(name = "products")
@@ -71,5 +73,12 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<ProductImage> images = new LinkedHashSet<>();
+
+    public ProductImage getMainProductImage(Set<ProductImage> images) {
+        Optional<ProductImage> productImage = images.stream()
+                .filter(ProductImage::getIsMain)
+                .findFirst();
+        return productImage.orElse(null);
+    }
 
 }

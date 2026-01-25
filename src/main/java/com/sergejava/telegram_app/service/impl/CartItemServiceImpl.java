@@ -5,6 +5,8 @@ import com.sergejava.telegram_app.dto.CartItemDTO;
 import com.sergejava.telegram_app.entity.Cart;
 import com.sergejava.telegram_app.entity.CartItem;
 import com.sergejava.telegram_app.entity.Product;
+import com.sergejava.telegram_app.entity.ProductSize;
+import com.sergejava.telegram_app.exceptions.ProductNotFoundException;
 import com.sergejava.telegram_app.mapper.CartItemMapper;
 import com.sergejava.telegram_app.repository.CartItemRepository;
 import com.sergejava.telegram_app.repository.CartRepository;
@@ -14,11 +16,11 @@ import com.sergejava.telegram_app.service.CartItemService;
 import com.sergejava.telegram_app.service.CartService;
 import com.sergejava.telegram_app.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class CartItemServiceImpl implements CartItemService {
@@ -38,18 +40,20 @@ public class CartItemServiceImpl implements CartItemService {
         Cart cart = cartRepository.findById(cartId).get();
 
         Product product = productRepository.findProduct(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product with id " + request.getProductId() + " not found!"));
+                .orElseThrow(() -> new ProductNotFoundException(request.getProductId()));
 
-        productService.changeProductSizeStock(product, request.getProductSize(), request.getQuantity());
+        ProductSize productSize = productService
+                .changeProductSizeStock(product, request.getProductSize(), request.getQuantity());
 
         CartItem cartItem = CartItem.builder()
                 .price(product.getPrice())
                 .quantity(request.getQuantity())
                 .cart(cart)
                 .product(product)
-                .productSize(request.getProductSize())
+                .productSize(productSize)
                 .build();
 
+        cart.setUpdatedAt(LocalDateTime.now());
         return CartItemMapper.toDTO(cartItemRepository.save(cartItem));
     }
 

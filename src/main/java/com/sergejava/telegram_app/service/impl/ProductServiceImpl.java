@@ -2,7 +2,6 @@ package com.sergejava.telegram_app.service.impl;
 
 import com.sergejava.telegram_app.dto.CreateProductRequest;
 import com.sergejava.telegram_app.dto.ProductDTO;
-import com.sergejava.telegram_app.dto.ProductSizeDTO;
 import com.sergejava.telegram_app.entity.Category;
 import com.sergejava.telegram_app.entity.Product;
 import com.sergejava.telegram_app.entity.ProductImage;
@@ -12,6 +11,7 @@ import com.sergejava.telegram_app.exceptions.CategoryNotFoundException;
 import com.sergejava.telegram_app.exceptions.ImageUrlsNullOrEmptyException;
 import com.sergejava.telegram_app.exceptions.InsufficientStockException;
 import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
+import com.sergejava.telegram_app.exceptions.InvalidSizeNameException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.mapper.ProductMapper;
 import com.sergejava.telegram_app.repository.CategoryRepository;
@@ -84,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public void changeProductSizeStock(Product product, String sizeName, Integer quantity) {
+    public ProductSize changeProductSizeStock(Product product, String sizeName, Integer quantity) {
         int totalStock = product.getStock();
         if (totalStock == 0 || totalStock < quantity) {
             throw new InsufficientStockException("the total stock of the product is either zero " +
@@ -93,7 +93,7 @@ public class ProductServiceImpl implements ProductService {
         ProductSize productSize = product.getProductSizes()
                 .stream()
                 .filter(p -> p.getSize().getName().equals(sizeName))
-                .findFirst().orElseThrow(() -> new RuntimeException("ProductSize with size '" + sizeName + "' not found!"));
+                .findFirst().orElseThrow(() -> new InvalidSizeNameException(sizeName));
         int stockSize = productSize.getStock();
         if (stockSize == 0 || stockSize < quantity) {
             throw new InsufficientStockException("The stock of the required product size is 0" +
@@ -103,10 +103,12 @@ public class ProductServiceImpl implements ProductService {
         totalStock -= quantity;
         productSize.setStock(stockSize);
         product.setStock(totalStock);
+        return productSize;
     }
 
     /**
      * Метод для подсчёта количества товаров на складе.
+     *
      * @param sizes {@code Map<String, Integer>} тип размера и их количество в формате ключ-значение
      * @return {@code Integer} общее количество всех товаров.
      * @author sergeJAVA
@@ -121,6 +123,7 @@ public class ProductServiceImpl implements ProductService {
 
     /**
      * Метод для создания и возвращения размеров товара.
+     *
      * @param sizes Тип размера и их количество в формате ключ-значение.
      * @param product Сущность для связывания с сущностью размера товара {@link ProductSize}.
      * @return возвращает {@code List<ProductSize}.
@@ -149,6 +152,7 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Метод для создания и получения картинок товара.
      * <p>Примечание: первая картинка из списка будет иметь значение {@code true} у поля {@code isMain}.</p>
+     *
      * @param imageUrls Ссылки на картинку.
      * @param product Сущность для связывания с сущностью картинки товара {@link ProductImage}.
      * @author sergeJAVA
@@ -178,6 +182,7 @@ public class ProductServiceImpl implements ProductService {
 
     /**
      * Метод для проверки того, что ссылки на картинки непустые.
+     *
      * @param imageUrls ссылки на картинки.
      * @author sergeJAVA
      */

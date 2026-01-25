@@ -6,7 +6,9 @@ import com.sergejava.telegram_app.exceptions.ImageUrlsNullOrEmptyException;
 import com.sergejava.telegram_app.exceptions.InsufficientStockException;
 import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
 import com.sergejava.telegram_app.exceptions.InvalidPageOrSizeException;
+import com.sergejava.telegram_app.exceptions.InvalidSizeNameException;
 import com.sergejava.telegram_app.exceptions.InvalidValidationTypeException;
+import com.sergejava.telegram_app.exceptions.ProductNotFoundException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
 import com.sergejava.telegram_app.exceptions.UserNotFoundException;
@@ -86,6 +88,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<?> handleInsufficientStock(InsufficientStockException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidSizeNameException.class)
+    public ResponseEntity<?> handleInvalidSizeName(InvalidSizeNameException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<?> handleProductNotFound(ProductNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 

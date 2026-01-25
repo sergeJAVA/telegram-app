@@ -16,6 +16,9 @@ public class CartItemDTO {
 
     private Long id;
 
+    @JsonProperty("product_name")
+    private String productName;
+
     private Integer quantity;
 
     private BigDecimal price;
