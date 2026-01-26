@@ -58,6 +58,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .path(request.getServletPath())
+                .method(request.getMethod())
                 .error(ex.getMessage())
                 .code(HttpStatus.UNAUTHORIZED.value())
                 .timestamp(LocalDateTime.now())

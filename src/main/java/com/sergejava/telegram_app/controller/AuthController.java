@@ -1,6 +1,7 @@
 package com.sergejava.telegram_app.controller;
 
 import com.sergejava.telegram_app.dto.InitDataUser;
+import com.sergejava.telegram_app.dto.SignUpResponse;
 import com.sergejava.telegram_app.security.service.JwtService;
 import com.sergejava.telegram_app.service.TelegramAuthService;
 import lombok.RequiredArgsConstructor;
@@ -38,14 +39,17 @@ public class AuthController {
     }
 
     @PostMapping("/signUp")
-    public ResponseEntity<?> signUp(@RequestBody Map<String, String> request) {
+    public ResponseEntity<SignUpResponse> signUp(@RequestBody Map<String, String> request) {
         String initData = request.get("initData");
+        SignUpResponse response;
         if (!telegramAuthService.validateInitData(initData)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid initData");
+            response = new SignUpResponse("Invalid initData", "UNAUTHORIZED");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         Map<String, String> params = parseInitData(initData);
         telegramAuthService.signUp(params);
-        return ResponseEntity.ok(Map.of("message", "User data saved successfully"));
+        response = new SignUpResponse("User data saved successfully", "OK");
+        return ResponseEntity.ok(response);
     }
 
 }

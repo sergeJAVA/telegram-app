@@ -16,7 +16,7 @@ import java.util.Set;
 @Builder
 public class TokenData {
 
-    private Long userId;
+    private Long userTelegramId;
     private String username;
     private Set<? extends GrantedAuthority> authorities;
     private String token;
