@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Кастомный entrypoint для не авторизированных пользователей.
+ */
 @Component
 @RequiredArgsConstructor
 public class CustomAuthEntrypoint implements AuthenticationEntryPoint {
@@ -39,6 +42,7 @@ public class CustomAuthEntrypoint implements AuthenticationEntryPoint {
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("timestamp", LocalDateTime.now());
         body.put("message", MESSAGE);
+        body.put("method", request.getMethod());
         return body;
     }
 

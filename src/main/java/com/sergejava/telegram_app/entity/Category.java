@@ -1,4 +1,4 @@
-package com.sergejava.telegram_app.model;
+package com.sergejava.telegram_app.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,32 +12,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Entity
+@Table(name = "categories")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "users")
-public class User {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "username")
-    private String username;
-
-    @Column(name = "language_code")
-    private String languageCode;
-
-    @Column(name = "allows_write_to_pm")
-    private Boolean allowsWriteToPM;
+    @Column(name = "description")
+    private String description;
 
 }

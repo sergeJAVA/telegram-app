@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class ErrorResponse {
 
     private String path;
+    private String method;
     private String error;
     private LocalDateTime timestamp;
     private int code;
