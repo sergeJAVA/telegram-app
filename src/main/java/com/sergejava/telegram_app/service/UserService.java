@@ -31,6 +31,6 @@ public interface UserService {
      */
     boolean validatePresence(TokenData tokenData);
 
-    UserDto saveUser(UserDto userDto);
     void deleteUserById(Long id);
+
 }
