@@ -1,6 +1,9 @@
 CREATE TABLE IF NOT EXISTS order_items(
     id BIGSERIAL PRIMARY KEY,
     quantity INTEGER NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    product_size VARCHAR(10) NOT NULL,
+    image_url TEXT NOT NULL,
     price NUMERIC(10,2) NOT NULL,
     order_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,

@@ -1,5 +1,6 @@
 package com.sergejava.telegram_app.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -29,9 +30,20 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "quantity")
     private Integer quantity;
 
+    @Column(name = "price")
     private BigDecimal price;
+
+    @Column(name = "product_name")
+    private String productName;
+
+    @Column(name = "product_size")
+    private String productSize;
+
+    @Column(name = "image_url")
+    private String imageURL;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
