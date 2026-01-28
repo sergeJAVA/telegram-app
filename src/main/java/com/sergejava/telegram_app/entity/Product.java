@@ -81,4 +81,14 @@ public class Product {
         return productImage.orElse(null);
     }
 
+    public ProductImage getMainProductImage() {
+        if (this.images == null || this.images.isEmpty()) {
+            return null;
+        }
+        Optional<ProductImage> productImage = images.stream()
+                .filter(ProductImage::getIsMain)
+                .findFirst();
+        return productImage.orElse(null);
+    }
+
 }

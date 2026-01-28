@@ -21,6 +21,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
                 "cartItems.product.images"
             }
     )
-    Optional<Cart> findUserId(@Param("userId") Long userId);
+    Optional<Cart> findByUserId(@Param("userId") Long userId);
 
 }

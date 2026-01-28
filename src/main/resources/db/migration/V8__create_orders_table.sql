@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS orders(
     total_price NUMERIC(10, 2) NOT NULL,
     status VARCHAR(15) NOT NULL,
     delivery_address VARCHAR(255) NOT NULL,
-    phone_number VARCHAR(12),
+    phone_number VARCHAR(12) NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE,
     user_id BIGINT NOT NULL,

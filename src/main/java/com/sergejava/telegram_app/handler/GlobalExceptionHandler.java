@@ -1,7 +1,9 @@
 package com.sergejava.telegram_app.handler;
 
+import com.sergejava.telegram_app.exceptions.CartNotFoundException;
 import com.sergejava.telegram_app.exceptions.CategoryAlreadyExistsException;
 import com.sergejava.telegram_app.exceptions.CategoryNotFoundException;
+import com.sergejava.telegram_app.exceptions.EmptyCartException;
 import com.sergejava.telegram_app.exceptions.ImageUrlsNullOrEmptyException;
 import com.sergejava.telegram_app.exceptions.InsufficientStockException;
 import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
@@ -98,6 +100,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<?> handleProductNotFound(ProductNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CartNotFoundException.class)
+    public ResponseEntity<?> handleCartNotFound(CartNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(EmptyCartException.class)
+    public ResponseEntity<?> handleEmptyCart(EmptyCartException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 

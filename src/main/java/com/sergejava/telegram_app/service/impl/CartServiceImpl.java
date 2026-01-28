@@ -26,7 +26,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartDTO getCartByUserId(Long userId) {
-        Optional<Cart> optionalCart = cartRepository.findUserId(userId);
+        Optional<Cart> optionalCart = cartRepository.findByUserId(userId);
         if (optionalCart.isPresent()) {
             log.info("Найдена корзина пользователя с userId '{}'.", userId);
             return CartMapper.toDTO(optionalCart.get());
