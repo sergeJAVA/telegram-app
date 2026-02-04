@@ -10,6 +10,8 @@ import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
 import com.sergejava.telegram_app.exceptions.InvalidPageOrSizeException;
 import com.sergejava.telegram_app.exceptions.InvalidSizeNameException;
 import com.sergejava.telegram_app.exceptions.InvalidValidationTypeException;
+import com.sergejava.telegram_app.exceptions.OrderAlreadyCancelledException;
+import com.sergejava.telegram_app.exceptions.OrderNotFoundException;
 import com.sergejava.telegram_app.exceptions.ProductNotFoundException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
@@ -110,6 +112,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmptyCartException.class)
     public ResponseEntity<?> handleEmptyCart(EmptyCartException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<?> handleOrderNotFound(OrderNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OrderAlreadyCancelledException.class)
+    public ResponseEntity<?> handleOrderAlreadyCancelled(OrderAlreadyCancelledException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 

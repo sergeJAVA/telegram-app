@@ -47,7 +47,7 @@ public interface ProductService {
     Page<ProductDTO> findAll(Pageable pageable);
 
     /**
-     * Метод для изменения количества товара с определённым размером в запасе.
+     * Метод для уменьшения количества товара с определённым размером на складе.
      *
      * @param product сущность, у которой будем изменять значение поля {@code stock}.
      * @param sizeName название размера (S, M, L и т.д.).
@@ -56,6 +56,6 @@ public interface ProductService {
      *
      * @author sergeJAVA
      */
-    ProductSize changeProductSizeStock(Product product, String sizeName, Integer quantity);
+    ProductSize reduceProductSizeStock(Product product, String sizeName, Integer quantity);
 
 }

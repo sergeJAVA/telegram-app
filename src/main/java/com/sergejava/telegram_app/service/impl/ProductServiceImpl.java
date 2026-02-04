@@ -84,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public ProductSize changeProductSizeStock(Product product, String sizeName, Integer quantity) {
+    public ProductSize reduceProductSizeStock(Product product, String sizeName, Integer quantity) {
         int totalStock = product.getStock();
         if (totalStock == 0 || totalStock < quantity) {
             throw new InsufficientStockException("the total stock of the product is either zero " +

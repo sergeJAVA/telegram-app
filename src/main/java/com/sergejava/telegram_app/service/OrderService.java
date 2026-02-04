@@ -8,4 +8,6 @@ public interface OrderService {
 
     OrderDTO createOrderFromCart(TokenData tokenData, CreateOrderRequest request);
 
+    OrderDTO cancelOrder(Long orderId);
+
 }

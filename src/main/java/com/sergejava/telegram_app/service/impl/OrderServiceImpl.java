@@ -7,12 +7,17 @@ import com.sergejava.telegram_app.entity.Cart;
 import com.sergejava.telegram_app.entity.CartItem;
 import com.sergejava.telegram_app.entity.Order;
 import com.sergejava.telegram_app.entity.OrderItem;
+import com.sergejava.telegram_app.entity.Product;
+import com.sergejava.telegram_app.entity.ProductSize;
 import com.sergejava.telegram_app.exceptions.CartNotFoundException;
 import com.sergejava.telegram_app.exceptions.EmptyCartException;
+import com.sergejava.telegram_app.exceptions.OrderAlreadyCancelledException;
+import com.sergejava.telegram_app.exceptions.OrderNotFoundException;
 import com.sergejava.telegram_app.mapper.OrderMapper;
 import com.sergejava.telegram_app.repository.CartRepository;
 import com.sergejava.telegram_app.repository.OrderItemRepository;
 import com.sergejava.telegram_app.repository.OrderRepository;
+import com.sergejava.telegram_app.repository.ProductRepository;
 import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional
@@ -50,6 +56,45 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(savedOrder);
         clearCart(cart);
         return OrderMapper.toDTO(savedOrder);
+    }
+
+    @Override
+    @Transactional
+    public OrderDTO cancelOrder(Long orderId) {
+        Order order = orderRepository.findByIdWithAllLinks(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        if (isOrderCancelled(order)) {
+            throw new OrderAlreadyCancelledException(
+                    String.format("Order with ID '%d' has already been cancelled.", orderId)
+            );
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        refundProducts(order.getOrderItems());
+        return OrderMapper.toDTO(order);
+    }
+
+    private void refundProducts(Set<OrderItem> orderItems) {
+        for (OrderItem orderItem : orderItems) {
+            Product product = orderItem.getProduct();
+            product.getProductSizes().stream()
+                    .filter(productSize -> sameName(productSize, orderItem))
+                    .forEach(productSize -> {
+                        Integer sizeStock = productSize.getStock();
+                        Integer productStock = product.getStock();
+                        Integer orderItemQuantity = orderItem.getQuantity();
+
+                        productSize.setStock(sizeStock + orderItemQuantity);
+                        product.setStock(productStock + orderItemQuantity);
+                    });
+        }
+    }
+
+    private boolean sameName(ProductSize productSize, OrderItem orderItem) {
+        return productSize.getSize().getName().equals(orderItem.getProductSize());
+    }
+
+    private boolean isOrderCancelled(Order order) {
+        return order.getStatus().equals(OrderStatus.CANCELLED);
     }
 
     private Set<OrderItem> createOrderItems(Set<CartItem> cartItems, Order order) {

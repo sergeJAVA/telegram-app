@@ -43,7 +43,7 @@ public class CartItemServiceImpl implements CartItemService {
                 .orElseThrow(() -> new ProductNotFoundException(request.getProductId()));
 
         ProductSize productSize = productService
-                .changeProductSizeStock(product, request.getProductSize(), request.getQuantity());
+                .reduceProductSizeStock(product, request.getProductSize(), request.getQuantity());
 
         CartItem cartItem = CartItem.builder()
                 .price(product.getPrice())
