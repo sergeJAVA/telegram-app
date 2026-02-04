@@ -1,6 +1,7 @@
 package com.sergejava.telegram_app.controller;
 
 import com.sergejava.telegram_app.dto.CreateOrderRequest;
+import com.sergejava.telegram_app.dto.OrderChangeStatusRequest;
 import com.sergejava.telegram_app.dto.OrderDTO;
 import com.sergejava.telegram_app.security.TokenAuthentication;
 import com.sergejava.telegram_app.service.OrderService;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,8 +33,14 @@ public class OrderController {
 
     @PostMapping("/{id}")
     public ResponseEntity<?> cancelOrder(@PathVariable Long id) {
-        OrderDTO orderDTO = orderService.cancelOrder(id);
-        return ResponseEntity.ok(orderDTO);
+        OrderDTO response = orderService.cancelOrder(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> changeOrderStatus(@RequestBody @Valid OrderChangeStatusRequest request) {
+        OrderDTO response = orderService.changeStatus(request.getId(), request.getStatus());
+        return ResponseEntity.ok(response);
     }
 
 }

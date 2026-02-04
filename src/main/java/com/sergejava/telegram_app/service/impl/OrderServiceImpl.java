@@ -11,6 +11,7 @@ import com.sergejava.telegram_app.entity.Product;
 import com.sergejava.telegram_app.entity.ProductSize;
 import com.sergejava.telegram_app.exceptions.CartNotFoundException;
 import com.sergejava.telegram_app.exceptions.EmptyCartException;
+import com.sergejava.telegram_app.exceptions.InvalidOrderStatusException;
 import com.sergejava.telegram_app.exceptions.OrderAlreadyCancelledException;
 import com.sergejava.telegram_app.exceptions.OrderNotFoundException;
 import com.sergejava.telegram_app.mapper.OrderMapper;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @Service
@@ -71,6 +73,34 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.CANCELLED);
         refundProducts(order.getOrderItems());
         return OrderMapper.toDTO(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderDTO changeStatus(Long orderId, String status) {
+        Order order = orderRepository.findByIdWithAllLinks(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        if (isOrderCancelled(order)) {
+            throw new OrderAlreadyCancelledException(
+                    String.format("The order with ID '%d' has already been canceled." +
+                            " You cannot change its status.", orderId));
+        }
+        changeOrderStatus(order, status);
+        return OrderMapper.toDTO(order);
+    }
+
+    private void changeOrderStatus(Order order, String status) {
+        switch (status.toUpperCase(Locale.ROOT)) {
+            case "PENDING" -> order.setStatus(OrderStatus.PENDING);
+            case "PAID" -> order.setStatus(OrderStatus.PAID);
+            case "SHIPPED" -> order.setStatus(OrderStatus.SHIPPED);
+            case "DELIVERED" -> order.setStatus(OrderStatus.DELIVERED);
+            case "CANCELLED" -> throw new InvalidOrderStatusException("Invalid order status." +
+                    " You can't set the status to CANCELLED; there's a different endpoint for that.\n" +
+                    "Valid values: PENDING, PAID, SHIPPED, DELIVERED.");
+            default -> throw new InvalidOrderStatusException("Invalid order status." +
+                    " Valid values: PENDING, PAID, SHIPPED, DELIVERED.");
+        }
     }
 
     private void refundProducts(Set<OrderItem> orderItems) {

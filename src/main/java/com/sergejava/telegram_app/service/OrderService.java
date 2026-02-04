@@ -10,4 +10,6 @@ public interface OrderService {
 
     OrderDTO cancelOrder(Long orderId);
 
+    OrderDTO changeStatus(Long orderId, String status);
+
 }

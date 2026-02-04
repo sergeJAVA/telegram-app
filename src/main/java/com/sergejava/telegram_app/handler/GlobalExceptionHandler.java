@@ -7,6 +7,7 @@ import com.sergejava.telegram_app.exceptions.EmptyCartException;
 import com.sergejava.telegram_app.exceptions.ImageUrlsNullOrEmptyException;
 import com.sergejava.telegram_app.exceptions.InsufficientStockException;
 import com.sergejava.telegram_app.exceptions.InvalidImageUrlException;
+import com.sergejava.telegram_app.exceptions.InvalidOrderStatusException;
 import com.sergejava.telegram_app.exceptions.InvalidPageOrSizeException;
 import com.sergejava.telegram_app.exceptions.InvalidSizeNameException;
 import com.sergejava.telegram_app.exceptions.InvalidValidationTypeException;
@@ -16,8 +17,10 @@ import com.sergejava.telegram_app.exceptions.ProductNotFoundException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
 import com.sergejava.telegram_app.exceptions.UserNotFoundException;
+import jakarta.validation.UnexpectedTypeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -123,6 +126,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OrderAlreadyCancelledException.class)
     public ResponseEntity<?> handleOrderAlreadyCancelled(OrderAlreadyCancelledException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOrderStatusException.class)
+    public ResponseEntity<?> handleInvalidOrderStatus(InvalidOrderStatusException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UnexpectedTypeException.class)
+    public ResponseEntity<?> handleUnexpectedType(UnexpectedTypeException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(ex.getMessage());
     }
 
 }
