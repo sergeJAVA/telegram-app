@@ -16,6 +16,11 @@ spring:
     enabled: true
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      password: ${REDIS_PASSWORD:}
+      port: ${REDIS_PORT:6379}
 
 telegram:
   bot:

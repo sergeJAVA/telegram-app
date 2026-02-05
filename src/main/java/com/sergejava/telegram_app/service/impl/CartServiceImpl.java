@@ -10,6 +10,7 @@ import com.sergejava.telegram_app.repository.UserRepository;
 import com.sergejava.telegram_app.service.CartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
+    @Cacheable(value = "cart", key = "#userId")
     public CartDTO getCartByUserId(Long userId) {
         Optional<Cart> optionalCart = cartRepository.findByUserId(userId);
         if (optionalCart.isPresent()) {

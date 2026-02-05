@@ -9,6 +9,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
@@ -97,6 +98,7 @@ public class JwtService {
      * @return {@code String}
      * @author sergeJAVA
      */
+    @Cacheable(value = "jwt", key = "#initDataUser.id")
     public String generateJwt(InitDataUser initDataUser) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", initDataUser.getId());
