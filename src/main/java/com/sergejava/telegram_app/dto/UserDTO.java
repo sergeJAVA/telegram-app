@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -35,5 +37,8 @@ public class UserDTO {
 
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
+
+    @Builder.Default
+    private List<RoleDTO> roles = new ArrayList<>();
 
 }

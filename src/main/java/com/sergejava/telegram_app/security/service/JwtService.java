@@ -1,6 +1,8 @@
 package com.sergejava.telegram_app.security.service;
 
 import com.sergejava.telegram_app.dto.InitDataUser;
+import com.sergejava.telegram_app.entity.Role;
+import com.sergejava.telegram_app.entity.User;
 import com.sergejava.telegram_app.security.TokenData;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -29,6 +31,9 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class JwtService {
+
+    private final static String GUEST_JWT_PREFIX = "guest_jwt";
+    private final static String JWT_PREFIX = "jwt";
 
     /**
      * Секретный ключ, которым подписывается JWT.
@@ -93,20 +98,38 @@ public class JwtService {
     }
 
     /**
-     * Метод для создания токена.
+     * Метод для создания токена неавторизированному пользователю.
      * @param initDataUser метаданные, которые приходят от Telegram.
      * @return {@code String}
      * @author sergeJAVA
      */
-    @Cacheable(value = "jwt", key = "#initDataUser.id")
-    public String generateJwt(InitDataUser initDataUser) {
+    @Cacheable(value = GUEST_JWT_PREFIX, key = "#initDataUser.id")
+    public String generateGuestJWT(InitDataUser initDataUser) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", initDataUser.getId());
         claims.put("username", initDataUser.getUsername());
-        claims.put("roles", Set.of("ROLE_USER"));
+        claims.put("roles", Set.of("ROLE_GUEST"));
         return Jwts.builder()
                 .claims(claims)
                 .subject(initDataUser.getUsername())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + lifeTime))
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
+                .compact();
+    }
+
+    @Cacheable(value = JWT_PREFIX, key = "#user.userId")
+    public String generateJWT(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("user_id", user.getUserId());
+        claims.put("username", user.getUsername());
+        claims.put("roles", user.getRoles().stream()
+                .map(role -> "ROLE_" + role.getName())
+                .collect(Collectors.toSet())
+        );
+        return Jwts.builder()
+                .claims(claims)
+                .subject(user.getUsername())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + lifeTime))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))

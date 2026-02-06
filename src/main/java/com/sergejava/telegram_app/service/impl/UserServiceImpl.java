@@ -1,10 +1,13 @@
 package com.sergejava.telegram_app.service.impl;
 
 import com.sergejava.telegram_app.dto.UserDTO;
+import com.sergejava.telegram_app.entity.Role;
+import com.sergejava.telegram_app.exceptions.RoleNotFoundException;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
 import com.sergejava.telegram_app.exceptions.UserNotFoundException;
 import com.sergejava.telegram_app.mapper.UserMapper;
 import com.sergejava.telegram_app.entity.User;
+import com.sergejava.telegram_app.repository.RoleRepository;
 import com.sergejava.telegram_app.repository.UserRepository;
 import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.UserService;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -22,6 +26,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @Override
     @Transactional
@@ -29,7 +34,10 @@ public class UserServiceImpl implements UserService {
         userRepository.findByUserId(userDto.getUserId()).ifPresent(user -> {
             throw new UserAlreadyExistsException("User with user_id " + user.getUserId() + " already exists.");
         });
+        Role userRole = roleRepository.findByName("USER")
+                .orElseThrow(() -> new RoleNotFoundException("Role USER not found!"));
         User user = UserMapper.toEntity(userDto);
+        user.setRoles(Set.of(userRole));
         return UserMapper.toDto(userRepository.save(user));
     }
 
@@ -46,6 +54,12 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException(id);
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDTO addRole(Long id, String role) {
+        // TODO: реализовать добавление роли пользователю
+        return null;
     }
 
 }
