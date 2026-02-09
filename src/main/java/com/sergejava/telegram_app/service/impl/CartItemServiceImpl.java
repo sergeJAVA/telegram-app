@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,6 @@ public class CartItemServiceImpl implements CartItemService {
     @Transactional
     @CacheEvict(value = "cart", key = "#tokenData.userTelegramId")
     public CartItemDTO addItemToCart(TokenData tokenData, AddItemToCartRequest request) {
-
         Long cartId = cartService.getCartByUserId(tokenData.getUserTelegramId()).getId();
 
         Cart cart = cartRepository.findById(cartId).get();
@@ -47,16 +47,40 @@ public class CartItemServiceImpl implements CartItemService {
         ProductSize productSize = productService
                 .reduceProductSizeStock(product, request.getProductSize(), request.getQuantity());
 
-        CartItem cartItem = CartItem.builder()
+        Optional<CartItem> existingCartItem = cartItemRepository.findByProductAndSizeAndCart(
+                product.getName(),
+                productSize.getSize().getName(),
+                cart.getId());
+
+        if (existingCartItem.isPresent()) {
+            CartItem cartItem = increaseQuantity(existingCartItem.get(), request, cart);
+            return CartItemMapper.toDTO(cartItem);
+        }
+
+        CartItem cartItem = createNew(request, product, cart, productSize);
+
+        cart.setUpdatedAt(LocalDateTime.now());
+        return CartItemMapper.toDTO(cartItemRepository.save(cartItem));
+    }
+
+    private CartItem createNew(AddItemToCartRequest request,
+                               Product product,
+                               Cart cart,
+                               ProductSize productSize) {
+        return CartItem.builder()
                 .price(product.getPrice())
                 .quantity(request.getQuantity())
                 .cart(cart)
                 .product(product)
                 .productSize(productSize)
                 .build();
+    }
 
+    private CartItem increaseQuantity(CartItem cartItem, AddItemToCartRequest request, Cart cart) {
+        Integer quantity = cartItem.getQuantity();
+        cartItem.setQuantity(quantity + request.getQuantity());
         cart.setUpdatedAt(LocalDateTime.now());
-        return CartItemMapper.toDTO(cartItemRepository.save(cartItem));
+        return cartItem;
     }
 
 }

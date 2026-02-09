@@ -14,6 +14,7 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     @EntityGraph(attributePaths =
             {
                 "user",
+                "user.roles",
                 "cartItems",
                 "cartItems.product",
                 "cartItems.productSize",
