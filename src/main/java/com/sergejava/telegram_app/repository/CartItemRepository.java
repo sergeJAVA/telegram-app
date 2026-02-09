@@ -19,4 +19,8 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
                                                    @Param("sizeName") String sizeName,
                                                    @Param("cartId") Long cartId);
 
+    @Query("SELECT ci FROM CartItem ci WHERE ci.id = :id")
+    @EntityGraph(attributePaths = {"cart", "cart.user", "product", "product.images", "productSize", "productSize.size"})
+    Optional<CartItem> findCartItemById(@Param("id") Long id);
+
 }

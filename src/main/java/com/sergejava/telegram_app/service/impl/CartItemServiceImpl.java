@@ -6,6 +6,9 @@ import com.sergejava.telegram_app.entity.Cart;
 import com.sergejava.telegram_app.entity.CartItem;
 import com.sergejava.telegram_app.entity.Product;
 import com.sergejava.telegram_app.entity.ProductSize;
+import com.sergejava.telegram_app.exceptions.CartItemNotFoundException;
+import com.sergejava.telegram_app.exceptions.CartItemRemovedException;
+import com.sergejava.telegram_app.exceptions.InsufficientStockException;
 import com.sergejava.telegram_app.exceptions.ProductNotFoundException;
 import com.sergejava.telegram_app.mapper.CartItemMapper;
 import com.sergejava.telegram_app.repository.CartItemRepository;
@@ -16,6 +19,7 @@ import com.sergejava.telegram_app.service.CartItemService;
 import com.sergejava.telegram_app.service.CartService;
 import com.sergejava.telegram_app.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +36,7 @@ public class CartItemServiceImpl implements CartItemService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final ProductService productService;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional
@@ -63,6 +68,92 @@ public class CartItemServiceImpl implements CartItemService {
         return CartItemMapper.toDTO(cartItemRepository.save(cartItem));
     }
 
+    @Override
+    @Transactional
+    public void deleteItemById(Long id) {
+        CartItem cartItem = cartItemRepository.findCartItemById(id)
+                .orElseThrow(() -> new CartItemNotFoundException(id));
+        Long userId = cartItem.getCart().getUser().getUserId();
+        increaseProductSizeAndProductStock(cartItem, cartItem.getQuantity());
+        clearCartCache(userId);
+        cartItemRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(noRollbackFor = CartItemRemovedException.class)
+    public CartItemDTO reduceItemQuantity(Long itemId, Integer requestQuantity) {
+        CartItem cartItem = cartItemRepository.findCartItemById(itemId)
+                .orElseThrow(() -> new CartItemNotFoundException(itemId));
+        Integer itemQuantity = cartItem.getQuantity();
+
+        if (itemQuantity == 1) {
+            clearCartCache(cartItem.getCart().getUser().getUserId());
+            removeAndThrow(cartItem, 1);
+        } else if (!validatedQuantity(itemQuantity, requestQuantity)) {
+            clearCartCache(cartItem.getCart().getUser().getUserId());
+            removeAndThrow(cartItem, cartItem.getQuantity());
+        }
+
+        cartItem.setQuantity(itemQuantity - requestQuantity);
+        increaseProductSizeAndProductStock(cartItem, requestQuantity);
+        clearCartCache(cartItem.getCart().getUser().getUserId());
+        return CartItemMapper.toDTO(cartItem);
+    }
+
+    @Override
+    @Transactional
+    public CartItemDTO increaseItemQuantity(Long itemId, Integer quantity) {
+        CartItem cartItem = cartItemRepository.findCartItemById(itemId)
+                .orElseThrow(() -> new CartItemNotFoundException(itemId));
+        Integer itemQuantity = cartItem.getQuantity();
+
+        reduceProductSizeAndProductStock(cartItem, quantity);
+
+        cartItem.setQuantity(itemQuantity + quantity);
+        clearCartCache(cartItem.getCart().getUser().getUserId());
+        return CartItemMapper.toDTO(cartItem);
+    }
+
+    private void removeAndThrow(CartItem cartItem, Integer quantity) {
+        increaseProductSizeAndProductStock(cartItem, quantity);
+        cartItemRepository.deleteById(cartItem.getId());
+        throw new CartItemRemovedException(cartItem.getId());
+    }
+
+    private boolean validatedQuantity(Integer itemQuantity, Integer requestQuantity) {
+        return (itemQuantity - requestQuantity) > 0;
+    }
+
+    private void increaseProductSizeAndProductStock(CartItem cartItem, Integer quantity) {
+        Product product = cartItem.getProduct();
+        ProductSize productSize = cartItem.getProductSize();
+
+        Integer productStock = product.getStock();
+        Integer productSizeStock = productSize.getStock();
+
+        product.setStock(productStock + quantity);
+        productSize.setStock(productSizeStock + quantity);
+    }
+
+    private void reduceProductSizeAndProductStock(CartItem cartItem, Integer quantity) {
+        Product product = cartItem.getProduct();
+        ProductSize productSize = cartItem.getProductSize();
+
+        Integer productStock = product.getStock();
+        Integer productSizeStock = productSize.getStock();
+        if (productStock == 0 || productStock < quantity) {
+            throw new InsufficientStockException("the stock of the product is either zero " +
+                    "or the quantity of the requested product is greater than the stock.");
+        } else if (productSizeStock == 0) {
+            throw new InsufficientStockException("The stock of the required product size is 0.");
+        } else if (productSizeStock < quantity) {
+            throw new InsufficientStockException("The requested quantity is greater than the stock size!");
+        } else {
+            product.setStock(productStock - quantity);
+            productSize.setStock(productSizeStock - quantity);
+        }
+    }
+
     private CartItem createNew(AddItemToCartRequest request,
                                Product product,
                                Cart cart,
@@ -81,6 +172,10 @@ public class CartItemServiceImpl implements CartItemService {
         cartItem.setQuantity(quantity + request.getQuantity());
         cart.setUpdatedAt(LocalDateTime.now());
         return cartItem;
+    }
+
+    private void clearCartCache(Long userId) {
+        cacheManager.getCache("cart").evict(userId);
     }
 
 }

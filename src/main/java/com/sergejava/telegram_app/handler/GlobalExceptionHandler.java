@@ -1,5 +1,7 @@
 package com.sergejava.telegram_app.handler;
 
+import com.sergejava.telegram_app.exceptions.CartItemNotFoundException;
+import com.sergejava.telegram_app.exceptions.CartItemRemovedException;
 import com.sergejava.telegram_app.exceptions.CartNotFoundException;
 import com.sergejava.telegram_app.exceptions.CategoryAlreadyExistsException;
 import com.sergejava.telegram_app.exceptions.CategoryNotFoundException;
@@ -145,6 +147,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .badRequest()
                 .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ResponseEntity<?> handleCartItemNotFound(CartItemNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CartItemRemovedException.class)
+    public ResponseEntity<?> handleCartItemRemoved(CartItemRemovedException ex) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ex.getMessage());
     }
 
 }
