@@ -4,17 +4,7 @@ import com.sergejava.telegram_app.dto.UserDTO;
 
 import java.util.Map;
 
-public interface TelegramAuthService {
-
-    /**
-     * Метод для валидации метаданных, которые присылает Telegram.
-     *
-     * @param initData
-     * @return {@code true} или {@code false}.
-     *
-     * @author sergeJAVA
-     */
-    boolean validateInitData(String initData);
+public interface AuthService {
 
     /**
      * Метод для регистрации нового пользователя в БД.
@@ -27,5 +17,7 @@ public interface TelegramAuthService {
      * @author sergeJAVA
      */
     UserDTO signUp(Map<String, String> params);
+
+    String signIn(Map<String, String> params);
 
 }

@@ -22,6 +22,7 @@ import com.sergejava.telegram_app.repository.ProductRepository;
 import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "cart", key = "#tokenData.userTelegramId")
     public OrderDTO createOrderFromCart(TokenData tokenData, CreateOrderRequest request) {
         Cart cart = cartRepository.findByUserId(tokenData.getUserTelegramId())
                 .orElseThrow(() -> new CartNotFoundException("The Cart for the user with userId '"

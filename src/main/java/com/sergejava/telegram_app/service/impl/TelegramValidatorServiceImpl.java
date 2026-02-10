@@ -1,9 +1,6 @@
 package com.sergejava.telegram_app.service.impl;
 
-import com.sergejava.telegram_app.dto.InitDataUser;
-import com.sergejava.telegram_app.dto.UserDTO;
-import com.sergejava.telegram_app.mapper.UserMapper;
-import com.sergejava.telegram_app.service.TelegramAuthService;
+import com.sergejava.telegram_app.service.TelegramValidatorService;
 import com.sergejava.telegram_app.service.UserService;
 import com.sergejava.telegram_app.util.ParseInitData;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class TelegramAuthServiceImpl  implements TelegramAuthService {
+public class TelegramValidatorServiceImpl implements TelegramValidatorService {
 
     @Value("${telegram.bot.token}")
     private String botToken;
@@ -53,12 +50,6 @@ public class TelegramAuthServiceImpl  implements TelegramAuthService {
             log.info("Exception message: {}", ex.getMessage());
             return false;
         }
-    }
-
-    @Override
-    public UserDTO signUp(Map<String, String> params) {
-        InitDataUser initDataUser = objectMapper.readValue(params.get("user"), InitDataUser.class);
-        return userService.saveUser(UserMapper.toDto(initDataUser));
     }
 
     private Mac createMacWithKey(String secretKey) throws Exception{

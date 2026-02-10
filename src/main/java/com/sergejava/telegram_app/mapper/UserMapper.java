@@ -1,9 +1,13 @@
 package com.sergejava.telegram_app.mapper;
 
 import com.sergejava.telegram_app.dto.InitDataUser;
+import com.sergejava.telegram_app.dto.RoleDTO;
 import com.sergejava.telegram_app.dto.UserDTO;
 import com.sergejava.telegram_app.entity.User;
 import lombok.experimental.UtilityClass;
+
+import java.util.Collections;
+import java.util.List;
 
 @UtilityClass
 public class UserMapper {
@@ -17,6 +21,7 @@ public class UserMapper {
                 .allowsWriteToPM(user.getAllowsWriteToPM())
                 .firstName(user.getFirstName())
                 .createdAt(user.getCreatedAt())
+                .roles(user.getRoles().isEmpty() ? Collections.emptyList() : mapRoles(user))
                 .build();
     }
 
@@ -40,6 +45,12 @@ public class UserMapper {
                 .languageCode(userDto.getLanguageCode())
                 .createdAt(userDto.getCreatedAt())
                 .build();
+    }
+
+    private List<RoleDTO> mapRoles(User user) {
+        return user.getRoles().stream()
+                .map(RoleMapper::toDTO)
+                .toList();
     }
 
 }

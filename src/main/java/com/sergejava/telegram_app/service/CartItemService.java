@@ -8,4 +8,10 @@ public interface CartItemService {
 
     CartItemDTO addItemToCart(TokenData tokenData, AddItemToCartRequest request);
 
+    void deleteItemById(Long id);
+
+    CartItemDTO reduceItemQuantity(Long itemId, Integer quantity);
+
+    CartItemDTO increaseItemQuantity(Long itemId, Integer quantity);
+
 }
