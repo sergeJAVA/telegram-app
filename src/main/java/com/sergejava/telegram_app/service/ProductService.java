@@ -9,14 +9,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Интерфейс, предоставляющий методы, для работы с бизнес-логикой над сущностью {@link Product}.
+ * <strong>Интерфейс, предоставляющий методы, для работы с бизнес-логикой над сущностью {@link Product}.</strong>
  *
  * @author sergeJAVA
  */
 public interface ProductService {
 
     /**
-     * Метод для создания нового товара, у которого задаётся размер, ссылки на картинки и категория.
+     * <b>Метод для создания нового товара, у которого задаётся размер, ссылки на картинки и категория.</b>
      *
      * @param request {@link CreateProductRequest} запрос, приходящий из контроллера.
      * @return {@link ProductDTO}
@@ -26,7 +26,7 @@ public interface ProductService {
     ProductDTO createProduct(CreateProductRequest request);
 
     /**
-     * Метод для получения товаров по категории с пагинацией.
+     * <b>Метод для получения товаров по категории с пагинацией.</b>
      *
      * @param categoryName название категории.
      * @param pageable передается {@link PageRequest}.
@@ -37,7 +37,7 @@ public interface ProductService {
     Page<ProductDTO> findByCategoryName(String categoryName, Pageable pageable);
 
     /**
-     * Метод для получения всех товаров с пагинацией.
+     * <b>Метод для получения всех товаров с пагинацией.</b>
      *
      * @param pageable передается {@link PageRequest}.
      * @return {@code Page<ProductDTO>}
@@ -47,7 +47,7 @@ public interface ProductService {
     Page<ProductDTO> findAll(Pageable pageable);
 
     /**
-     * Метод для уменьшения количества товара с определённым размером на складе.
+     * <b>Метод для уменьшения количества товара с определённым размером на складе.</b>
      *
      * @param product сущность, у которой будем изменять значение поля {@code stock}.
      * @param sizeName название размера (S, M, L и т.д.).

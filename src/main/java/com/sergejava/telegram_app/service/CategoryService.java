@@ -6,15 +6,14 @@ import com.sergejava.telegram_app.entity.Category;
 import java.util.List;
 
 /**
- * Интерфейс, предоставляющий методы, для работы с бизнес-логикой над сущностью {@link Category}.
+ * <b>Интерфейс, предоставляющий методы, для работы с бизнес-логикой над сущностью {@link Category}.</b>
  *
  * @author sergeJAVA
  */
 public interface CategoryService {
 
     /**
-     * Метод для создания новой категории в БД.
-     *
+     * <b>Метод для создания новой категории в БД.</b>
      * @param categoryDTO
      * @return {@link CategoryDTO}
      *
@@ -23,7 +22,7 @@ public interface CategoryService {
     CategoryDTO createCategory(CategoryDTO categoryDTO);
 
     /**
-     * Метод для получения всех категорий.
+     * <strong>Метод для получения всех категорий.</strong>
      *
      * @return {@code List<CategoryDTO>}
      *

@@ -25,7 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Сервис для валидации, создания и парсинга JWT.
+ * <b>Сервис для валидации, создания и парсинга JWT.</b>
  * @author sergeJAVA
  */
 @Service
@@ -50,7 +50,8 @@ public class JwtService {
     private Long lifeTime;
 
     /**
-     * Метод для получения user_id из токена.
+     * <b>Метод для получения user_id из токена.</b>
+     *
      * @param token
      * @return {@code Long}
      * @author sergeJAVA
@@ -60,7 +61,8 @@ public class JwtService {
     }
 
     /**
-     * Метод для получения username из токена.
+     * <b>Метод для получения username из токена.</b>
+     *
      * @param token
      * @return {@code String}
      * @author sergeJAVA
@@ -70,7 +72,8 @@ public class JwtService {
     }
 
     /**
-     * Метод для получения ролей из токена.
+     * <b>Метод для получения ролей из токена.</b>
+     *
      * <p>Примечание: роли хранятся в формате {@code ROLE_название роли}.</p>
      * @param token
      * @return {@code List<String>}
@@ -81,7 +84,8 @@ public class JwtService {
     }
 
     /**
-     * Метод для проверки времени жизни токена.
+     * <b>Метод для проверки времени жизни токена.</b>
+     *
      * @param token
      * @return возвращает {@code true}, если токен не истёк, или {@code false}, если истёк.
      * @author sergeJAVA
@@ -98,7 +102,8 @@ public class JwtService {
     }
 
     /**
-     * Метод для создания токена неавторизированному пользователю.
+     * <b>Метод для создания токена неавторизированному пользователю.</b>
+     *
      * @param initDataUser метаданные, которые приходят от Telegram.
      * @return {@code String}
      * @author sergeJAVA
@@ -137,7 +142,8 @@ public class JwtService {
     }
 
     /**
-     * Метод для парсинга информации из токена и создания {@link TokenData}.
+     * <b>Метод для парсинга информации из токена и создания {@link TokenData}.</b>
+     *
      * @param token
      * @return {@link TokenData}
      * @author sergeJAVA
@@ -154,7 +160,8 @@ public class JwtService {
     }
 
     /**
-     * Метод для получения {@code Claims} из токена.
+     * <b>Метод для получения {@code Claims} из токена.</b>
+     *
      * @param token
      * @return {@code Claims}
      * @author sergeJAVA

@@ -11,7 +11,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Аннотация для проверки параметров page и size, которые используются для пагинации запроса.
+ * <b>Аннотация для проверки параметров page и size, которые используются для пагинации запроса.</b>
+ *
+ * @author sergeJAVA
  */
 @Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
