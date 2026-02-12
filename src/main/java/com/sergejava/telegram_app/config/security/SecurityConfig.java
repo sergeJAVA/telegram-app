@@ -1,6 +1,7 @@
 package com.sergejava.telegram_app.config.security;
 
 import com.sergejava.telegram_app.entrypoint.CustomAuthEntrypoint;
+import com.sergejava.telegram_app.handler.CustomAccessDeniedHandler;
 import com.sergejava.telegram_app.security.filter.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final CustomAuthEntrypoint customAuthEntrypoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final JwtRequestFilter jwtRequestFilter;
 
     @Bean
@@ -36,7 +38,8 @@ public class SecurityConfig {
                 .headers(headers ->
                         headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(customAuthEntrypoint))
+                        exception.authenticationEntryPoint(customAuthEntrypoint)
+                                .accessDeniedHandler(customAccessDeniedHandler))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

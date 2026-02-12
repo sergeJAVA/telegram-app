@@ -6,4 +6,12 @@ public class UserNotFoundException extends RuntimeException {
         super(String.format("User with 'user_id' %d doesn't exist! Please register in the system.", userId));
     }
 
+    public UserNotFoundException(String message) {
+        super(message);
+    }
+
+    public static UserNotFoundException defaultMessage(Long userId) {
+        return new UserNotFoundException(String.format("User with 'user_id' %d doesn't exist!", userId));
+    }
+
 }

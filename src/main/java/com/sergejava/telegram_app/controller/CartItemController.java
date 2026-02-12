@@ -9,6 +9,7 @@ import com.sergejava.telegram_app.service.CartItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,6 +27,7 @@ public class CartItemController {
     private final CartItemService service;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<CartItemDTO> addItemToCart(@RequestBody AddItemToCartRequest request, Authentication authentication) {
         TokenAuthentication tokenAuthentication = (TokenAuthentication) authentication;
         TokenData tokenData = tokenAuthentication.getTokenData();
@@ -33,18 +35,21 @@ public class CartItemController {
     }
 
     @PatchMapping("/reduce")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> reduceItemQuantity(@Valid @RequestBody ChangeItemQuantityRequest request) {
         CartItemDTO cartItemDTO = service.reduceItemQuantity(request.getItemId(), request.getQuantity());
         return ResponseEntity.ok(cartItemDTO);
     }
 
     @PatchMapping("/increase")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> increaseItemQuantity(@Valid @RequestBody ChangeItemQuantityRequest request) {
         CartItemDTO cartItemDTO = service.increaseItemQuantity(request.getItemId(), request.getQuantity());
         return ResponseEntity.ok(cartItemDTO);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Void> deleteItemById(@PathVariable("id") Long id) {
         service.deleteItemById(id);
         return ResponseEntity.ok(null);

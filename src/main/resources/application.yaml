@@ -29,3 +29,6 @@ telegram:
 jwt:
   secret: ${telegram.bot.token}
   life-time: 1800000
+
+app:
+  admin-id: ${ADMIN_ID:-1}

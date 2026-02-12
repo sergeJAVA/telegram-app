@@ -1,5 +1,6 @@
 package com.sergejava.telegram_app.handler;
 
+import com.sergejava.telegram_app.exceptions.AdminNotSpecifiedException;
 import com.sergejava.telegram_app.exceptions.CartItemNotFoundException;
 import com.sergejava.telegram_app.exceptions.CartItemRemovedException;
 import com.sergejava.telegram_app.exceptions.CartNotFoundException;
@@ -16,8 +17,10 @@ import com.sergejava.telegram_app.exceptions.InvalidValidationTypeException;
 import com.sergejava.telegram_app.exceptions.OrderAlreadyCancelledException;
 import com.sergejava.telegram_app.exceptions.OrderNotFoundException;
 import com.sergejava.telegram_app.exceptions.ProductNotFoundException;
+import com.sergejava.telegram_app.exceptions.RoleNotFoundException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
 import com.sergejava.telegram_app.exceptions.UserAlreadyExistsException;
+import com.sergejava.telegram_app.exceptions.UserIdNotEqualsToAdminIdException;
 import com.sergejava.telegram_app.exceptions.UserNotFoundException;
 import jakarta.validation.UnexpectedTypeException;
 import org.springframework.http.HttpStatus;
@@ -157,6 +160,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CartItemRemovedException.class)
     public ResponseEntity<?> handleCartItemRemoved(CartItemRemovedException ex) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AdminNotSpecifiedException.class)
+    public ResponseEntity<?> handleAdminNotSpecified(AdminNotSpecifiedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UserIdNotEqualsToAdminIdException.class)
+    public ResponseEntity<?> handleUserIdNotEqualsToAdminId(UserIdNotEqualsToAdminIdException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<?> handleRoleNotFound(RoleNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
 }

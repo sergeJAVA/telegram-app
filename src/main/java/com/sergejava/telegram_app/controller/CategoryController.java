@@ -4,6 +4,7 @@ import com.sergejava.telegram_app.dto.CategoryDTO;
 import com.sergejava.telegram_app.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody CategoryDTO request) {
         return ResponseEntity.ok(categoryService.createCategory(request));
     }

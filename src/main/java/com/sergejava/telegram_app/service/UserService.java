@@ -33,6 +33,8 @@ public interface UserService {
 
     void deleteUserById(Long id);
 
-    UserDTO addRole(Long id, String role);
+    UserDTO addRole(Long userId, String roleName);
+
+    UserDTO becomeAdmin(TokenData tokenData);
 
 }
