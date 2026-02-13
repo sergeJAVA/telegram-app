@@ -16,6 +16,7 @@ import com.sergejava.telegram_app.exceptions.InvalidSizeNameException;
 import com.sergejava.telegram_app.exceptions.InvalidValidationTypeException;
 import com.sergejava.telegram_app.exceptions.OrderAlreadyCancelledException;
 import com.sergejava.telegram_app.exceptions.OrderNotFoundException;
+import com.sergejava.telegram_app.exceptions.OrderOwnershipException;
 import com.sergejava.telegram_app.exceptions.ProductNotFoundException;
 import com.sergejava.telegram_app.exceptions.RoleNotFoundException;
 import com.sergejava.telegram_app.exceptions.SizeNotFoundByNameException;
@@ -175,6 +176,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RoleNotFoundException.class)
     public ResponseEntity<?> handleRoleNotFound(RoleNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OrderOwnershipException.class)
+    public ResponseEntity<?> handleOrderOwnership(OrderOwnershipException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
 }

@@ -3,6 +3,7 @@ package com.sergejava.telegram_app.service.impl;
 import com.sergejava.telegram_app.constant.OrderStatus;
 import com.sergejava.telegram_app.dto.CreateOrderRequest;
 import com.sergejava.telegram_app.dto.OrderDTO;
+import com.sergejava.telegram_app.dto.SearchOrdersRequest;
 import com.sergejava.telegram_app.entity.Cart;
 import com.sergejava.telegram_app.entity.CartItem;
 import com.sergejava.telegram_app.entity.Order;
@@ -14,6 +15,7 @@ import com.sergejava.telegram_app.exceptions.EmptyCartException;
 import com.sergejava.telegram_app.exceptions.InvalidOrderStatusException;
 import com.sergejava.telegram_app.exceptions.OrderAlreadyCancelledException;
 import com.sergejava.telegram_app.exceptions.OrderNotFoundException;
+import com.sergejava.telegram_app.exceptions.OrderOwnershipException;
 import com.sergejava.telegram_app.mapper.OrderMapper;
 import com.sergejava.telegram_app.repository.CartRepository;
 import com.sergejava.telegram_app.repository.OrderItemRepository;
@@ -23,6 +25,7 @@ import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,6 +94,31 @@ public class OrderServiceImpl implements OrderService {
         return OrderMapper.toDTO(order);
     }
 
+    @Override
+    @Transactional
+    public OrderDTO cancelMyOrder(Long id, Long userTelegramId) {
+        Order order = orderRepository.findByIdWithAllLinks(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+        if (!order.getUser().getUserId().equals(userTelegramId)) {
+            throw new OrderOwnershipException();
+        }
+        if (isOrderCancelled(order)) {
+            throw new OrderAlreadyCancelledException(
+                    String.format("Order with ID '%d' has already been cancelled.", id)
+            );
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        refundProducts(order.getOrderItems());
+        return OrderMapper.toDTO(order);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderDTO> getMyOrders(SearchOrdersRequest request) {
+        //TODO: реализовать метод для получения заказов, которые принадлежат пользователю, с фильтрами.
+        return null;
+    }
+
     private void changeOrderStatus(Order order, String status) {
         switch (status.toUpperCase(Locale.ROOT)) {
             case "PENDING" -> order.setStatus(OrderStatus.PENDING);
@@ -114,7 +142,6 @@ public class OrderServiceImpl implements OrderService {
                         Integer sizeStock = productSize.getStock();
                         Integer productStock = product.getStock();
                         Integer orderItemQuantity = orderItem.getQuantity();
-
                         productSize.setStock(sizeStock + orderItemQuantity);
                         product.setStock(productStock + orderItemQuantity);
                     });
