@@ -129,6 +129,18 @@ class CartItemControllerTest extends TestContainers {
                 .andExpect(jsonPath("$.product_id").value(productDTO.getId()))
                 .andExpect(jsonPath("$.main_image_url").value("mainURL"))
                 .andExpect(jsonPath("$.price").value(10000));
+
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.product_name").value(productDTO.getName()))
+                .andExpect(jsonPath("$.quantity").value(4))
+                .andExpect(jsonPath("$.product_id").value(productDTO.getId()))
+                .andExpect(jsonPath("$.main_image_url").value("mainURL"))
+                .andExpect(jsonPath("$.price").value(10000));
     }
 
 }
