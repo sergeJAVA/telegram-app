@@ -3,7 +3,9 @@ package com.sergejava.telegram_app.controller;
 import com.sergejava.telegram_app.dto.CreateOrderRequest;
 import com.sergejava.telegram_app.dto.OrderChangeStatusRequest;
 import com.sergejava.telegram_app.dto.OrderDTO;
+import com.sergejava.telegram_app.dto.PageDTO;
 import com.sergejava.telegram_app.dto.SearchOrdersRequest;
+import com.sergejava.telegram_app.mapper.PageMapper;
 import com.sergejava.telegram_app.security.TokenAuthentication;
 import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.OrderService;
@@ -13,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,13 +62,13 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/my")
+    @PostMapping("/my")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<?> getMyOrders(@RequestBody @Valid SearchOrdersRequest request, Authentication authentication) {
+    public ResponseEntity<PageDTO<OrderDTO>> getMyOrders(@RequestBody @Valid SearchOrdersRequest request, Authentication authentication) {
         TokenAuthentication tokenAuthentication = (TokenAuthentication) authentication;
         TokenData tokenData = tokenAuthentication.getTokenData();
-        Page<OrderDTO> response = orderService.getMyOrders(request);
-        return ResponseEntity.ok(response);
+        Page<OrderDTO> response = orderService.getMyOrders(request, tokenData);
+        return ResponseEntity.ok(PageMapper.toDTO(response));
     }
 
 }

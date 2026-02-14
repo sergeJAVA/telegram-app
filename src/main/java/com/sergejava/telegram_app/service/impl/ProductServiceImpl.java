@@ -20,7 +20,7 @@ import com.sergejava.telegram_app.repository.ProductRepository;
 import com.sergejava.telegram_app.repository.ProductSizeRepository;
 import com.sergejava.telegram_app.repository.SizeRepository;
 import com.sergejava.telegram_app.service.ProductService;
-import com.sergejava.telegram_app.specification.ProductSpecification;
+import com.sergejava.telegram_app.specification.ProductSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductDTO> findByCategoryName(String categoryName, Pageable pageable) {
-        Specification<Product> spec = ProductSpecification.byCategoryName(categoryName);
+        Specification<Product> spec = ProductSpecifications.byCategoryName(categoryName);
         return productRepository.findAll(spec, pageable).map(ProductMapper::toDTO);
     }
 

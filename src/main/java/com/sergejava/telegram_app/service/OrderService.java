@@ -48,6 +48,6 @@ public interface OrderService {
 
     OrderDTO cancelMyOrder(Long id, Long userTelegramId);
 
-    Page<OrderDTO> getMyOrders(SearchOrdersRequest request);
+    Page<OrderDTO> getMyOrders(SearchOrdersRequest request, TokenData tokenData);
 
 }

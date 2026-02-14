@@ -1,8 +1,9 @@
 package com.sergejava.telegram_app.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,10 +19,13 @@ public class SearchOrdersRequest {
     @NotBlank
     private String status;
 
-    @Size
+    @Min(value = 0, message = "page must be >= 0")
+    @NotNull
     private Integer page;
 
-    @Size
+    @Min(value = 5, message = "size min value is 5")
+    @Max(value = 50, message = "size max value is 50")
+    @NotNull
     private Integer size;
 
 }

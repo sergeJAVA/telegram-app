@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
 @UtilityClass
-public class ProductSpecification {
+public class ProductSpecifications {
 
     public static Specification<Product> byCategoryName(String categoryName) {
         return (root, query, criteriaBuilder) -> {

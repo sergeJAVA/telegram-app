@@ -23,9 +23,13 @@ import com.sergejava.telegram_app.repository.OrderRepository;
 import com.sergejava.telegram_app.repository.ProductRepository;
 import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.OrderService;
+import com.sergejava.telegram_app.specification.OrderSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -114,9 +118,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderDTO> getMyOrders(SearchOrdersRequest request) {
-        //TODO: реализовать метод для получения заказов, которые принадлежат пользователю, с фильтрами.
-        return null;
+    public Page<OrderDTO> getMyOrders(SearchOrdersRequest request, TokenData tokenData) {
+        Specification<Order> specification =
+                OrderSpecifications.findOrdersByUserAndStatus(tokenData.getUserTelegramId(), request.getStatus());
+        Page<Order> orders = orderRepository.findAll(specification,
+                PageRequest.of(request.getPage(),
+                        request.getSize(),
+                        Sort.by(Sort.Direction.DESC, "createdAt"))
+        );
+        return orders.map(OrderMapper::toDTO);
     }
 
     private void changeOrderStatus(Order order, String status) {
