@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Обработчик ошибок.
+ * <b>Обработчик ошибок.</b>
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
