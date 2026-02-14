@@ -24,9 +24,6 @@ public class CreateProductRequest {
 
     private BigDecimal price;
 
-    @JsonProperty("image_url")
-    private String imageUrl;
-
     @JsonProperty("category_id")
     private Long categoryId;
 

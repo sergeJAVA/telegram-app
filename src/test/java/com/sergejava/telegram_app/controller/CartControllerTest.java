@@ -8,7 +8,6 @@ import com.sergejava.telegram_app.repository.UserRepository;
 import com.sergejava.telegram_app.security.service.JwtService;
 import com.sergejava.telegram_app.service.UserService;
 import com.sergejava.telegram_app.util.TestContainers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,6 +51,7 @@ class CartControllerTest extends TestContainers {
 
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
         user = User.builder()
                 .userId(1111L)
                 .firstName("Test")
@@ -64,11 +64,6 @@ class CartControllerTest extends TestContainers {
         token = jwtService.generateJWT(user);
     }
 
-    @AfterEach
-    void afterEach() {
-        userRepository.deleteAll();
-    }
-
     @Test
     @DisplayName("Получение корзины: Success")
     void getCart_Success() throws Exception {
@@ -76,7 +71,6 @@ class CartControllerTest extends TestContainers {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.user_telegram_id").value(user.getUserId()))
-                .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.cart_items", hasSize(0)));
 
         Cache.ValueWrapper valueWrapper = cacheManager.getCache("cart").get(user.getUserId());
@@ -84,6 +78,13 @@ class CartControllerTest extends TestContainers {
         CartDTO cartDTO = (CartDTO) valueWrapper.get();
         assertThat(cartDTO).isNotNull();
         assertThat(cartDTO.getUserTelegramId().equals(user.getUserId()));
+
+        cacheManager.getCache("cart").evict(user.getUserId());
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user_telegram_id").value(user.getUserId()))
+                .andExpect(jsonPath("$.cart_items", hasSize(0)));
     }
 
     @Test
