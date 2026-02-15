@@ -3,6 +3,11 @@ spring:
     name: telegram-app
   datasource:
     driver-class-name: org.postgresql.Driver
+  jpa:
+    database: POSTGRESQL
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
   flyway:
     baseline-on-migrate: true
     enabled: true

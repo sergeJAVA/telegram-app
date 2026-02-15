@@ -6,19 +6,23 @@ import com.sergejava.telegram_app.entity.Cart;
 import com.sergejava.telegram_app.entity.CartItem;
 import com.sergejava.telegram_app.entity.Product;
 import com.sergejava.telegram_app.entity.ProductSize;
+import com.sergejava.telegram_app.entity.User;
 import com.sergejava.telegram_app.exceptions.CartItemNotFoundException;
 import com.sergejava.telegram_app.exceptions.CartItemRemovedException;
+import com.sergejava.telegram_app.exceptions.CartOwnershipException;
 import com.sergejava.telegram_app.exceptions.InsufficientStockException;
 import com.sergejava.telegram_app.exceptions.ProductNotFoundException;
+import com.sergejava.telegram_app.exceptions.UserNotFoundException;
 import com.sergejava.telegram_app.mapper.CartItemMapper;
 import com.sergejava.telegram_app.repository.CartItemRepository;
 import com.sergejava.telegram_app.repository.CartRepository;
 import com.sergejava.telegram_app.repository.ProductRepository;
+import com.sergejava.telegram_app.repository.UserRepository;
 import com.sergejava.telegram_app.security.TokenData;
 import com.sergejava.telegram_app.service.CartItemService;
-import com.sergejava.telegram_app.service.CartService;
 import com.sergejava.telegram_app.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -27,14 +31,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartItemServiceImpl implements CartItemService {
 
-    private final CartService cartService;
     private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
     private final ProductService productService;
     private final CacheManager cacheManager;
 
@@ -42,9 +47,7 @@ public class CartItemServiceImpl implements CartItemService {
     @Transactional
     @CacheEvict(value = "cart", key = "#tokenData.userTelegramId")
     public CartItemDTO addItemToCart(TokenData tokenData, AddItemToCartRequest request) {
-        Long cartId = cartService.getCartByUserId(tokenData.getUserTelegramId()).getId();
-
-        Cart cart = cartRepository.findById(cartId).get();
+        Cart cart = findCartElseCreate(tokenData);
 
         Product product = productRepository.findProduct(request.getProductId())
                 .orElseThrow(() -> new ProductNotFoundException(request.getProductId()));
@@ -70,10 +73,13 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     @Transactional
-    public void deleteItemById(Long id) {
+    public void deleteItemById(Long id, TokenData tokenData) {
         CartItem cartItem = cartItemRepository.findCartItemById(id)
                 .orElseThrow(() -> new CartItemNotFoundException(id));
         Long userId = cartItem.getCart().getUser().getUserId();
+        if (!userId.equals(tokenData.getUserTelegramId())) {
+            throw CartOwnershipException.defaultMessage();
+        }
         increaseProductSizeAndProductStock(cartItem, cartItem.getQuantity());
         clearCartCache(userId);
         cartItemRepository.deleteById(id);
@@ -176,6 +182,22 @@ public class CartItemServiceImpl implements CartItemService {
 
     private void clearCartCache(Long userId) {
         cacheManager.getCache("cart").evict(userId);
+    }
+
+    private Cart findCartElseCreate(TokenData tokenData) {
+        Optional<Cart> optionalCart = cartRepository.findByUserId(tokenData.getUserTelegramId());
+        if (optionalCart.isEmpty()) {
+            log.info("A NEW CART IS CREATED BECAUSE IT DID NOT EXIST FOR THE USER");
+            User user = userRepository.findByUserId(tokenData.getUserTelegramId()).orElseThrow(
+                    () -> new UserNotFoundException(tokenData.getUserTelegramId())
+            );
+            Cart cart = Cart.builder()
+                    .user(user)
+                    .build();
+            return cartRepository.save(cart);
+        }
+        log.info("CART FOUND");
+        return optionalCart.get();
     }
 
 }

@@ -4,6 +4,7 @@ import com.sergejava.telegram_app.dto.CartDTO;
 import com.sergejava.telegram_app.dto.UserDTO;
 import com.sergejava.telegram_app.entity.User;
 import com.sergejava.telegram_app.mapper.UserMapper;
+import com.sergejava.telegram_app.repository.UserRepository;
 import com.sergejava.telegram_app.security.service.JwtService;
 import com.sergejava.telegram_app.service.UserService;
 import com.sergejava.telegram_app.util.TestContainers;
@@ -41,12 +42,16 @@ class CartControllerTest extends TestContainers {
     @Autowired
     private CacheManager cacheManager;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private String token;
 
     private User user;
 
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
         user = User.builder()
                 .userId(1111L)
                 .firstName("Test")
@@ -66,7 +71,6 @@ class CartControllerTest extends TestContainers {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.user_telegram_id").value(user.getUserId()))
-                .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.cart_items", hasSize(0)));
 
         Cache.ValueWrapper valueWrapper = cacheManager.getCache("cart").get(user.getUserId());
@@ -74,6 +78,32 @@ class CartControllerTest extends TestContainers {
         CartDTO cartDTO = (CartDTO) valueWrapper.get();
         assertThat(cartDTO).isNotNull();
         assertThat(cartDTO.getUserTelegramId().equals(user.getUserId()));
+
+        cacheManager.getCache("cart").evict(user.getUserId());
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user_telegram_id").value(user.getUserId()))
+                .andExpect(jsonPath("$.cart_items", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("Получение корзины: Failure")
+    void getCart_Failure() throws Exception {
+        User testUser = User.builder()
+                .userId(1234L)
+                .firstName("user")
+                .username("user")
+                .allowsWriteToPM(true)
+                .languageCode("EN")
+                .build();
+        String testToken = jwtService.generateJWT(testUser);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart")
+                        .header("Authorization", "Bearer " + testToken))
+                .andExpect(status().is(404))
+                .andExpect(jsonPath("$").value("User with 'user_id' " + testUser.getUserId() +
+                        " doesn't exist! Please register in the system."));
     }
 
 }

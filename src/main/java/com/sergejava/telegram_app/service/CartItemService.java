@@ -26,10 +26,10 @@ public interface CartItemService {
      * <b>Метод для удаления {@link CartItem} из корзины.</b>
      *
      * @param id ID товара в корзине.
-     *
+     * @param tokenData метаданные из JWT.
      * @author sergeJAVA
      */
-    void deleteItemById(Long id);
+    void deleteItemById(Long id, TokenData tokenData);
 
     /**
      * <p><em><b>Метод для уменьшения количества конкретного {@link CartItem} в корзине.</b></em></p>

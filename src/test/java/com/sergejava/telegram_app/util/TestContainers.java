@@ -4,11 +4,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-@Testcontainers
 @Profile("test")
 public abstract class TestContainers {
 
@@ -18,16 +15,19 @@ public abstract class TestContainers {
             "IgimyhLOc8qJzWDZUXHsoo31QguQ3Pjuv9vxZLkjR25olhjJR0tma7wQzyC2hU" +
             "M271uLZjATyLJaDSlfu8j392tO1ofgz5xPqL2vbdstmh";
 
-    @Container
     static final PostgreSQLContainer postgres =
             new PostgreSQLContainer("postgres:17.4")
                     .withUsername("test")
                     .withPassword("test");
 
-    @Container
     static final GenericContainer<?> redis = new GenericContainer<>("redis:8.2.1")
             .withExposedPorts(6379)
             .withCommand("redis-server --requirepass testpass");
+
+    {
+        postgres.start();
+        redis.start();
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
