@@ -17,7 +17,6 @@ import com.sergejava.telegram_app.service.CategoryService;
 import com.sergejava.telegram_app.service.ProductService;
 import com.sergejava.telegram_app.service.UserService;
 import com.sergejava.telegram_app.util.TestContainers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +32,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -213,6 +211,31 @@ class CartItemControllerTest extends TestContainers {
                         .header("Authorization", "Bearer " + anotherToken))
                 .andExpect(status().is(403))
                 .andExpect(jsonPath("$").value("CartItem is in a cart that doesn't belong to you!"));
+    }
+
+    @Test
+    @DisplayName("Добавление товара в корзину: Failure, UserNotFoundException")
+    void addItemToCart_Failure_UserNotFound() throws Exception {
+        User anotherUser = User.builder()
+                .userId(12356L)
+                .firstName("anotherUser")
+                .username("anotherTest")
+                .allowsWriteToPM(true)
+                .languageCode("EN")
+                .roles(Set.of(new Role(32,"USER")))
+                .build();
+        String anotherToken = jwtService.generateJWT(anotherUser);
+        AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(2)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + anotherToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().is(404))
+                .andExpect(jsonPath("$").value("User with 'user_id' " + anotherUser.getUserId() + " doesn't exist! Please register in the system."));
     }
 
 }
