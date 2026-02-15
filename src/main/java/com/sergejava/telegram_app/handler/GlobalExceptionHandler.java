@@ -4,6 +4,7 @@ import com.sergejava.telegram_app.exceptions.AdminNotSpecifiedException;
 import com.sergejava.telegram_app.exceptions.CartItemNotFoundException;
 import com.sergejava.telegram_app.exceptions.CartItemRemovedException;
 import com.sergejava.telegram_app.exceptions.CartNotFoundException;
+import com.sergejava.telegram_app.exceptions.CartOwnershipException;
 import com.sergejava.telegram_app.exceptions.CategoryAlreadyExistsException;
 import com.sergejava.telegram_app.exceptions.CategoryNotFoundException;
 import com.sergejava.telegram_app.exceptions.EmptyCartException;
@@ -181,6 +182,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OrderOwnershipException.class)
     public ResponseEntity<?> handleOrderOwnership(OrderOwnershipException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CartOwnershipException.class)
+    public ResponseEntity<?> handleCartOwnership(CartOwnershipException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
 }

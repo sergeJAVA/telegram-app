@@ -1,6 +1,7 @@
 package com.sergejava.telegram_app.controller;
 
 import com.sergejava.telegram_app.dto.AddItemToCartRequest;
+import com.sergejava.telegram_app.dto.CartDTO;
 import com.sergejava.telegram_app.dto.CategoryDTO;
 import com.sergejava.telegram_app.dto.CreateProductRequest;
 import com.sergejava.telegram_app.dto.ProductDTO;
@@ -16,6 +17,7 @@ import com.sergejava.telegram_app.service.CategoryService;
 import com.sergejava.telegram_app.service.ProductService;
 import com.sergejava.telegram_app.service.UserService;
 import com.sergejava.telegram_app.util.TestContainers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,14 +27,18 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -96,9 +102,8 @@ class CartItemControllerTest extends TestContainers {
                 .imageUrls(List.of("mainURL", "testURL"))
                 .build();
         productDTO = productService.createProduct(productRequest);
-
         user = User.builder()
-                .userId(9999L)
+                .userId(1111L)
                 .firstName("Test")
                 .username("test")
                 .allowsWriteToPM(true)
@@ -123,7 +128,6 @@ class CartItemControllerTest extends TestContainers {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.product_name").value(productDTO.getName()))
                 .andExpect(jsonPath("$.quantity").value(addItemToCartRequest.getQuantity()))
                 .andExpect(jsonPath("$.product_id").value(productDTO.getId()))
@@ -135,12 +139,80 @@ class CartItemControllerTest extends TestContainers {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.product_name").value(productDTO.getName()))
                 .andExpect(jsonPath("$.quantity").value(4))
                 .andExpect(jsonPath("$.product_id").value(productDTO.getId()))
                 .andExpect(jsonPath("$.main_image_url").value("mainURL"))
                 .andExpect(jsonPath("$.price").value(10000));
+    }
+
+    @Test
+    @DisplayName("Удаление товара из корзины: Success")
+    void deleteItemById_Success() throws Exception {
+        AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(2)
+                .build();
+        String cartDtoStr = mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user_telegram_id").value(user.getUserId()))
+                .andExpect(jsonPath("$.cart_items").isNotEmpty());
+
+        CartDTO cartDTO = objectMapper.readValue(cartDtoStr, CartDTO.class);
+        mockMvc.perform(delete("/api/cartItems/" + cartDTO.getId())
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/cart")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cart_items").isEmpty());
+    }
+
+    @Test
+    @DisplayName("Пользователь пытается удалить товар из корзины, которая ему не принадлежит: Failure")
+    void deleteItemById_Failure() throws Exception {
+        User anotherUser = User.builder()
+                .userId(12356L)
+                .firstName("anotherUser")
+                .username("anotherTest")
+                .allowsWriteToPM(true)
+                .languageCode("EN")
+                .roles(Set.of(new Role(32,"USER")))
+                .build();
+        String anotherToken = jwtService.generateJWT(anotherUser);
+        UserDTO userDTO = UserMapper.toDto(anotherUser);
+        UserMapper.toEntity(userService.saveUser(userDTO));
+
+        AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(2)
+                .build();
+        String cartDtoStr = mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user_telegram_id").value(user.getUserId()))
+                .andExpect(jsonPath("$.cart_items").isNotEmpty());
+
+        CartDTO cartDTO = objectMapper.readValue(cartDtoStr, CartDTO.class);
+        mockMvc.perform(delete("/api/cartItems/" + cartDTO.getId())
+                        .header("Authorization", "Bearer " + anotherToken))
+                .andExpect(status().is(403))
+                .andExpect(jsonPath("$").value("CartItem is in a cart that doesn't belong to you!"));
     }
 
 }

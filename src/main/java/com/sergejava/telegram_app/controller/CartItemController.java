@@ -50,8 +50,10 @@ public class CartItemController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<Void> deleteItemById(@PathVariable("id") Long id) {
-        service.deleteItemById(id);
+    public ResponseEntity<Void> deleteItemById(@PathVariable("id") Long id, Authentication authentication) {
+        TokenAuthentication tokenAuthentication = (TokenAuthentication) authentication;
+        TokenData tokenData = tokenAuthentication.getTokenData();
+        service.deleteItemById(id, tokenData);
         return ResponseEntity.ok(null);
     }
 
