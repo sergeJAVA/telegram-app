@@ -87,11 +87,11 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     @Transactional(noRollbackFor = CartItemRemovedException.class)
-    public CartItemDTO reduceItemQuantity(Long itemId, Integer requestQuantity) {
+    public CartItemDTO reduceItemQuantity(Long itemId, Integer requestQuantity, TokenData tokenData) {
         CartItem cartItem = cartItemRepository.findCartItemById(itemId)
                 .orElseThrow(() -> new CartItemNotFoundException(itemId));
+        validateCartOwnership(cartItem.getCart().getUser(), tokenData);
         Integer itemQuantity = cartItem.getQuantity();
-
         if (itemQuantity == 1) {
             clearCartCache(cartItem.getCart().getUser().getUserId());
             removeAndThrow(cartItem, 1);
@@ -108,9 +108,10 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     @Transactional
-    public CartItemDTO increaseItemQuantity(Long itemId, Integer quantity) {
+    public CartItemDTO increaseItemQuantity(Long itemId, Integer quantity, TokenData tokenData) {
         CartItem cartItem = cartItemRepository.findCartItemById(itemId)
                 .orElseThrow(() -> new CartItemNotFoundException(itemId));
+        validateCartOwnership(cartItem.getCart().getUser(), tokenData);
         Integer itemQuantity = cartItem.getQuantity();
 
         reduceProductSizeAndProductStock(cartItem, quantity);
@@ -118,6 +119,12 @@ public class CartItemServiceImpl implements CartItemService {
         cartItem.setQuantity(itemQuantity + quantity);
         clearCartCache(cartItem.getCart().getUser().getUserId());
         return CartItemMapper.toDTO(cartItem);
+    }
+
+    private void validateCartOwnership(User user, TokenData tokenData) {
+        if (!user.getUserId().equals(tokenData.getUserTelegramId())) {
+            throw new CartOwnershipException("The CartItem you are trying to change is in a cart that doesn't belong to you!");
+        }
     }
 
     private void removeAndThrow(CartItem cartItem, Integer quantity) {
@@ -147,9 +154,10 @@ public class CartItemServiceImpl implements CartItemService {
 
         Integer productStock = product.getStock();
         Integer productSizeStock = productSize.getStock();
-        if (productStock == 0 || productStock < quantity) {
-            throw new InsufficientStockException("the stock of the product is either zero " +
-                    "or the quantity of the requested product is greater than the stock.");
+        if (productStock == 0) {
+            throw new InsufficientStockException("the stock of the product is 0.");
+        } else if (productStock < quantity) {
+            throw new InsufficientStockException("The quantity of the requested product is greater than the stock.");
         } else if (productSizeStock == 0) {
             throw new InsufficientStockException("The stock of the required product size is 0.");
         } else if (productSizeStock < quantity) {
