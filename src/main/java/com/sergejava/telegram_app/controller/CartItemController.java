@@ -36,15 +36,21 @@ public class CartItemController {
 
     @PatchMapping("/reduce")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<?> reduceItemQuantity(@Valid @RequestBody ChangeItemQuantityRequest request) {
-        CartItemDTO cartItemDTO = service.reduceItemQuantity(request.getItemId(), request.getQuantity());
+    public ResponseEntity<?> reduceItemQuantity(@Valid @RequestBody ChangeItemQuantityRequest request,
+                                                Authentication authentication) {
+        TokenAuthentication tokenAuthentication = (TokenAuthentication) authentication;
+        TokenData tokenData = tokenAuthentication.getTokenData();
+        CartItemDTO cartItemDTO = service.reduceItemQuantity(request.getItemId(), request.getQuantity(), tokenData);
         return ResponseEntity.ok(cartItemDTO);
     }
 
     @PatchMapping("/increase")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<?> increaseItemQuantity(@Valid @RequestBody ChangeItemQuantityRequest request) {
-        CartItemDTO cartItemDTO = service.increaseItemQuantity(request.getItemId(), request.getQuantity());
+    public ResponseEntity<?> increaseItemQuantity(@Valid @RequestBody ChangeItemQuantityRequest request,
+                                                  Authentication authentication) {
+        TokenAuthentication tokenAuthentication = (TokenAuthentication) authentication;
+        TokenData tokenData = tokenAuthentication.getTokenData();
+        CartItemDTO cartItemDTO = service.increaseItemQuantity(request.getItemId(), request.getQuantity(), tokenData);
         return ResponseEntity.ok(cartItemDTO);
     }
 

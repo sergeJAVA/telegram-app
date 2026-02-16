@@ -44,7 +44,7 @@ public interface CartItemService {
      *
      * @author sergeJAVA
      */
-    CartItemDTO reduceItemQuantity(Long itemId, Integer quantity);
+    CartItemDTO reduceItemQuantity(Long itemId, Integer quantity, TokenData tokenData);
 
     /**
      * <b>Метод для увеличения количества конкретного {@link CartItem} в корзине.</b>
@@ -55,6 +55,6 @@ public interface CartItemService {
      *
      * @author sergeJAVA
      */
-    CartItemDTO increaseItemQuantity(Long itemId, Integer quantity);
+    CartItemDTO increaseItemQuantity(Long itemId, Integer quantity, TokenData tokenData);
 
 }
