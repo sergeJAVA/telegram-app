@@ -7,6 +7,7 @@ import com.sergejava.telegram_app.dto.CreateProductRequest;
 import com.sergejava.telegram_app.dto.OrderChangeStatusRequest;
 import com.sergejava.telegram_app.dto.OrderDTO;
 import com.sergejava.telegram_app.dto.ProductDTO;
+import com.sergejava.telegram_app.dto.SearchOrdersRequest;
 import com.sergejava.telegram_app.dto.UserDTO;
 import com.sergejava.telegram_app.entity.Role;
 import com.sergejava.telegram_app.entity.User;
@@ -288,6 +289,7 @@ class OrderControllerTest extends TestContainers {
     }
 
     @Test
+    @DisplayName("Статус заказа успешно изменён.")
     void changeOrderStatus_Success() throws Exception {
         AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
                 .productId(productDTO.getId())
@@ -364,6 +366,7 @@ class OrderControllerTest extends TestContainers {
     }
 
     @Test
+    @DisplayName("Не удалось изменить статус: заказ не был найден.")
     void changeOrderStatus_Failure_NotFound() throws Exception {
         Long orderId = 444L;
         OrderChangeStatusRequest changeStatusRequest = OrderChangeStatusRequest.builder()
@@ -379,6 +382,7 @@ class OrderControllerTest extends TestContainers {
     }
 
     @Test
+    @DisplayName("Не удалось изменить статус: заказ уже отменён.")
     void changeOrderStatus_Failure_AlreadyCancelled() throws Exception {
         AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
                 .productId(productDTO.getId())
@@ -423,6 +427,7 @@ class OrderControllerTest extends TestContainers {
     }
 
     @Test
+    @DisplayName("Не удалось изменить статус: неправильный статус.")
     void changeOrderStatus_Failure_WrongStatus() throws Exception {
         AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
                 .productId(productDTO.getId())
@@ -461,5 +466,175 @@ class OrderControllerTest extends TestContainers {
                         " Valid values: PENDING, PAID, SHIPPED, DELIVERED."));
     }
 
+    @Test
+    @DisplayName("Заказ пользователя успешно отменён.")
+    void cancelMyOrder_Success() throws Exception {
+        AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(2)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.product_name").value(productDTO.getName()));
+
+        CreateOrderRequest createOrderRequest = CreateOrderRequest.builder()
+                .phoneNumber("+79999990011")
+                .deliveryAddress("Test address")
+                .build();
+        OrderDTO orderDTO = objectMapper.readValue(mockMvc.perform(post("/api/orders")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(createOrderRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andReturn().getResponse().getContentAsString(), OrderDTO.class);
+
+        mockMvc.perform(post("/api/orders/my/" + orderDTO.getId())
+                .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.id").value(orderDTO.getId()));
+    }
+
+    @Test
+    @DisplayName("Заказ с таким ID не был найден.")
+    void cancelMyOrder_Failure_OrderNotFound() throws Exception {
+        Long orderId = 999L;
+        mockMvc.perform(post("/api/orders/my/" + orderId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().is(404))
+                .andExpect(jsonPath("$").value(String.format("Order with ID '%d' not found!", orderId)));
+    }
+
+    @Test
+    @DisplayName("Заказ не принадлежит пользователю.")
+    void cancelMyOrder_Failure_OwnershipException() throws Exception {
+        AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(2)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.product_name").value(productDTO.getName()));
+
+        CreateOrderRequest createOrderRequest = CreateOrderRequest.builder()
+                .phoneNumber("+79999990011")
+                .deliveryAddress("Test address")
+                .build();
+        OrderDTO orderDTO = objectMapper.readValue(mockMvc.perform(post("/api/orders")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(createOrderRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andReturn().getResponse().getContentAsString(), OrderDTO.class);
+
+        mockMvc.perform(post("/api/orders/my/" + orderDTO.getId())
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$").value("The order does not belong to the user."));
+    }
+
+    @Test
+    @DisplayName("Заказ пользователя уже отменён.")
+    void cancelMyOrder_Failure_AlreadyCancelled() throws Exception {
+        AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(2)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.product_name").value(productDTO.getName()));
+
+        CreateOrderRequest createOrderRequest = CreateOrderRequest.builder()
+                .phoneNumber("+79999990011")
+                .deliveryAddress("Test address")
+                .build();
+        OrderDTO orderDTO = objectMapper.readValue(mockMvc.perform(post("/api/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(createOrderRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andReturn().getResponse().getContentAsString(), OrderDTO.class);
+
+        mockMvc.perform(post("/api/orders/my/" + orderDTO.getId())
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.id").value(orderDTO.getId()));
+
+        mockMvc.perform(post("/api/orders/my/" + orderDTO.getId())
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$")
+                        .value( String.format("Order with ID '%d' has already been cancelled.", orderDTO.getId())));
+    }
+
+    @Test
+    @DisplayName("Успешное получение заказов")
+    void getMyOrders_Success() throws Exception {
+        AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(2)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.product_name").value(productDTO.getName()));
+
+        CreateOrderRequest createOrderRequest = CreateOrderRequest.builder()
+                .phoneNumber("+79999990011")
+                .deliveryAddress("Test address")
+                .build();
+        OrderDTO orderDTO = objectMapper.readValue(mockMvc.perform(post("/api/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(createOrderRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andReturn().getResponse().getContentAsString(), OrderDTO.class);
+
+        SearchOrdersRequest searchOrdersRequest = SearchOrdersRequest.builder()
+                .status("pending")
+                .page(0)
+                .size(5)
+                .build();
+        mockMvc.perform(post("/api/orders/my")
+                .header("Authorization", "Bearer " + userToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(searchOrdersRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(orderDTO.getId()))
+                .andExpect(jsonPath("$.content[0].total_price").value(20000))
+                .andExpect(jsonPath("$.content[0].phone_number").value(createOrderRequest.getPhoneNumber()))
+                .andExpect(jsonPath("$.content[0].delivery_address").value(createOrderRequest.getDeliveryAddress()))
+                .andExpect(jsonPath("$.content[0].order_items").isNotEmpty())
+                .andExpect(jsonPath("$.content[0].order_items", hasSize(1)))
+                .andExpect(jsonPath("$.numberOfElements").value(1));;
+
+        mockMvc.perform(post("/api/orders/my")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(searchOrdersRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.numberOfElements").value(0));
+    }
 
 }
