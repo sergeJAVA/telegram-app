@@ -1,7 +1,6 @@
 package com.sergejava.telegram_app.security.service;
 
 import com.sergejava.telegram_app.dto.InitDataUser;
-import com.sergejava.telegram_app.entity.Role;
 import com.sergejava.telegram_app.entity.User;
 import com.sergejava.telegram_app.security.TokenData;
 import io.jsonwebtoken.Claims;
@@ -11,7 +10,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +29,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class JwtService {
-
-    private final static String GUEST_JWT_PREFIX = "guest_jwt";
-    private final static String JWT_PREFIX = "jwt";
 
     /**
      * Секретный ключ, которым подписывается JWT.
@@ -108,7 +103,6 @@ public class JwtService {
      * @return {@code String}
      * @author sergeJAVA
      */
-    @Cacheable(value = GUEST_JWT_PREFIX, key = "#initDataUser.id")
     public String generateGuestJWT(InitDataUser initDataUser) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", initDataUser.getId());
@@ -123,7 +117,6 @@ public class JwtService {
                 .compact();
     }
 
-    @Cacheable(value = JWT_PREFIX, key = "#user.userId")
     public String generateJWT(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", user.getUserId());
