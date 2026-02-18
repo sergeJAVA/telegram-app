@@ -159,6 +159,7 @@ class CategoryControllerTest extends TestContainers {
     }
 
     @Test
+    @DisplayName("Категория уже существует.")
     void createCategory_Failure_AlreadyExists() throws Exception {
         CategoryDTO request = CategoryDTO.builder()
                 .name("Jacket")
@@ -178,5 +179,6 @@ class CategoryControllerTest extends TestContainers {
                 .andExpect(jsonPath("$")
                         .value(String.format("Category with name '%s' already exists!", request.getName())));
     }
+
 
 }
