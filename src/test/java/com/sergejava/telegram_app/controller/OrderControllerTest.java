@@ -105,7 +105,6 @@ class OrderControllerTest extends TestContainers {
                 .name("TestProduct")
                 .price(new BigDecimal("10000.00"))
                 .categoryId(categoryDTO.getId())
-                .categoryName(categoryDTO.getName())
                 .sizes(Map.of("M", 10, "S", 2))
                 .imageUrls(List.of("mainURL", "testURL"))
                 .build();

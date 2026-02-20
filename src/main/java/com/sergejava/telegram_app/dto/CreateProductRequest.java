@@ -27,9 +27,6 @@ public class CreateProductRequest {
     @JsonProperty("category_id")
     private Long categoryId;
 
-    @JsonProperty("category_name")
-    private String categoryName;
-
     @Builder.Default
     private Map<String, Integer> sizes = new HashMap<>();
 
