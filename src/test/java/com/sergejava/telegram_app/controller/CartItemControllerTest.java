@@ -106,7 +106,6 @@ class CartItemControllerTest extends TestContainers {
                 .name("TestProduct")
                 .price(new BigDecimal(10000))
                 .categoryId(categoryDTO.getId())
-                .categoryName(categoryDTO.getName())
                 .sizes(Map.of("M", 10, "S", 2))
                 .imageUrls(List.of("mainURL", "testURL"))
                 .build();
@@ -153,6 +152,80 @@ class CartItemControllerTest extends TestContainers {
                 .andExpect(jsonPath("$.product_id").value(productDTO.getId()))
                 .andExpect(jsonPath("$.main_image_url").value("mainURL"))
                 .andExpect(jsonPath("$.price").value(10000));
+    }
+
+    @Test
+    void addItemToCart_Failure_InsufficientStock() throws Exception {
+        CreateProductRequest productRequest = CreateProductRequest.builder()
+                .name("Test")
+                .price(new BigDecimal(10000))
+                .categoryId(categoryDTO.getId())
+                .sizes(Map.of("M", 0))
+                .imageUrls(List.of("mainURL", "testURL"))
+                .build();
+        productDTO = productService.createProduct(productRequest);
+        AddItemToCartRequest addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(2)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$").value("The total stock of the product is zero."));
+
+        productRequest = CreateProductRequest.builder()
+                .name("Test")
+                .price(new BigDecimal(10000))
+                .categoryId(categoryDTO.getId())
+                .sizes(Map.of("M", 10, "S", 0))
+                .imageUrls(List.of("mainURL", "testURL"))
+                .build();
+        productDTO = productService.createProduct(productRequest);
+        addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("S")
+                .quantity(2)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$").value("The stock of the required product size is 0."));
+        addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("M")
+                .quantity(12)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$").value("The quantity of the requested product is greater than the stock."));
+
+        productRequest = CreateProductRequest.builder()
+                .name("Test")
+                .price(new BigDecimal(10000))
+                .categoryId(categoryDTO.getId())
+                .sizes(Map.of("M", 10, "S", 1))
+                .imageUrls(List.of("mainURL", "testURL"))
+                .build();
+        productDTO = productService.createProduct(productRequest);
+        addItemToCartRequest = AddItemToCartRequest.builder()
+                .productId(productDTO.getId())
+                .productSize("S")
+                .quantity(2)
+                .build();
+        mockMvc.perform(post("/api/cartItems")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(addItemToCartRequest)))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$").value("The requested quantity is greater than the stock size!"));
     }
 
     @Test

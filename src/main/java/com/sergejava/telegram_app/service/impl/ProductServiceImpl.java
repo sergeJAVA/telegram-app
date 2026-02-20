@@ -86,24 +86,34 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductSize reduceProductSizeStock(Product product, String sizeName, Integer quantity) {
         int totalStock = product.getStock();
-        if (totalStock == 0 || totalStock < quantity) {
-            throw new InsufficientStockException("the total stock of the product is either zero " +
-                    "or the quantity of the requested product is greater than the stock.");
-        }
+        validateTotalStock(totalStock, quantity);
         ProductSize productSize = product.getProductSizes()
                 .stream()
                 .filter(p -> p.getSize().getName().equals(sizeName))
                 .findFirst().orElseThrow(() -> new InvalidSizeNameException(sizeName));
-        int stockSize = productSize.getStock();
-        if (stockSize == 0 || stockSize < quantity) {
-            throw new InsufficientStockException("The stock of the required product size is 0" +
-                    " or the requested quantity is greater than the stock size!");
-        }
-        stockSize -= quantity;
+        int sizeStock = productSize.getStock();
+        validateSizeStock(sizeStock, quantity);
+        sizeStock -= quantity;
         totalStock -= quantity;
-        productSize.setStock(stockSize);
+        productSize.setStock(sizeStock);
         product.setStock(totalStock);
         return productSize;
+    }
+
+    private void validateTotalStock(int totalStock, Integer quantity) {
+        if (totalStock == 0) {
+            throw new InsufficientStockException("The total stock of the product is zero.");
+        } else if (totalStock < quantity) {
+            throw new InsufficientStockException("The quantity of the requested product is greater than the stock.");
+        }
+    }
+
+    private void validateSizeStock(int sizeStock, Integer quantity) {
+        if (sizeStock == 0) {
+            throw new InsufficientStockException("The stock of the required product size is 0.");
+        } else if (sizeStock < quantity) {
+            throw new InsufficientStockException("The requested quantity is greater than the stock size!");
+        }
     }
 
     /**

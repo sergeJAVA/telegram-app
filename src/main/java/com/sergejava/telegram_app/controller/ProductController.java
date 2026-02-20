@@ -2,10 +2,11 @@ package com.sergejava.telegram_app.controller;
 
 import com.sergejava.telegram_app.annotation.ValidPageable;
 import com.sergejava.telegram_app.dto.CreateProductRequest;
+import com.sergejava.telegram_app.dto.PageDTO;
 import com.sergejava.telegram_app.dto.ProductDTO;
+import com.sergejava.telegram_app.mapper.PageMapper;
 import com.sergejava.telegram_app.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,18 +32,21 @@ public class ProductController {
     }
 
     @GetMapping("/category/{categoryName}")
-    public ResponseEntity<Page<ProductDTO>> getProductsByCategory(
+    public ResponseEntity<?> getProductsByCategory(
             @PathVariable String categoryName,
             @ValidPageable @RequestParam(defaultValue = "0") int page,
             @ValidPageable(type = "size") @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(productService.findByCategoryName(categoryName, PageRequest.of(page, size)));
+        PageDTO<ProductDTO> response = PageMapper
+                .toDTO(productService.findByCategoryName(categoryName, PageRequest.of(page, size)));
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> getAll(
+    public ResponseEntity<?> getAll(
             @ValidPageable @RequestParam(defaultValue = "0") int page,
             @ValidPageable(type = "size") @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(productService.findAll(PageRequest.of(page, size)));
+        PageDTO<ProductDTO> response = PageMapper.toDTO(productService.findAll(PageRequest.of(page, size)));
+        return ResponseEntity.ok(response);
     }
 
 }
