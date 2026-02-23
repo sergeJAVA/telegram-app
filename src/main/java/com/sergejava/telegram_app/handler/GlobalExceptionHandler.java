@@ -166,7 +166,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AdminNotSpecifiedException.class)
     public ResponseEntity<?> handleAdminNotSpecified(AdminNotSpecifiedException ex) {
-        return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
     @ExceptionHandler(UserIdNotEqualsToAdminIdException.class)
